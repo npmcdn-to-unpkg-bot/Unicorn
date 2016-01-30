@@ -1,1 +1,13 @@
-# Unicorn
+Collaborative Comic Strips :: Unicorn Edition!
+==============================================
+
+Setting up a dev environment
+----------------------------
+
+1. Install [Vagrant](https://vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/).
+2. `vagrant-plugin install vagrant-hostmanager`
+3. Clone this repo.
+4. Run `vagrant up` in the repo root.
+5. `vagrant ssh`, then `cd vagrant` and `npm start`.
+
+You'll then be able to access the app at [unicorn.comics:3000](http://unicorn.comics:3000/)!
