@@ -29,4 +29,4 @@ sudo apt-get install -qq -y nodejs build-essential postgresql-9.5
 sudo npm -g install knex
 
 cd /vagrant
-npm install
+npm install --no-bin-links
