@@ -26,7 +26,9 @@ fi
 sudo apt-get update -qq
 sudo apt-get install -qq -y nodejs build-essential postgresql-9.5
 
-sudo npm -g install knex
+sudo npm -g install knex gulp typings
 
 cd /vagrant
 npm install --no-bin-links
+
+knex migrate:latest
