@@ -6,3 +6,4 @@ typings
 *.iml
 *.log
 app/**/*.js
+!app/migrations/*.js
