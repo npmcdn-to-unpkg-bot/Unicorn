@@ -30,5 +30,6 @@ sudo npm -g install knex gulp typings
 
 cd /vagrant
 npm install --no-bin-links
+typings install
 
 knex migrate:latest
