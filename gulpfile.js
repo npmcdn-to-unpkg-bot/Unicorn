@@ -12,9 +12,9 @@ gulp.task('scripts', function () {
     var tsResult = tsProject.src() // instead of gulp.src(...)
         .pipe(ts(tsProject));
 
-    return tsResult.js.pipe(gulp.dest('release'));
+    return tsResult.js.pipe(gulp.dest('release/server'));
 });
 
 gulp.task('watch', ['scripts'], function () {
-    gulp.watch('./app/**/*.ts', ['scripts']);
+    gulp.watch('./src/server/**/*.ts', ['scripts']);
 });

@@ -10,6 +10,6 @@
     "typings/main"
   ],
   "filesGlob": [
-    "./app/**/*.ts"
+    "./src/server/**/*.ts"
   ]
 }

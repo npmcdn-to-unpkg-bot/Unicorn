@@ -16,7 +16,7 @@ var app = express();
 
 
 // Set up our database connection
-var knexConfig = require('../knexfile');
+var knexConfig = require('../../knexfile');
 Model.knex(Knex(knexConfig.development));
 
 // view engine setup

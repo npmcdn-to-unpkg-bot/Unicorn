@@ -5,5 +5,5 @@ typings
 .idea
 *.iml
 *.log
-app/**/*.js
-!app/migrations/*.js
+src/server/**/*.js
+!migrations/*.js
