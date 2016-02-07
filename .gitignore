@@ -5,3 +5,4 @@ typings
 .idea
 *.iml
 *.log
+app/**/*.js
