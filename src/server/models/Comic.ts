@@ -10,16 +10,16 @@ export class Comic extends BaseModel {
         return 'comics';
     }
 
-    static get jsonSchema() {
-        return {
-            type: 'object',
-            required: ['id', 'title', 'created_at', 'updated_at'],
-            properties: {
-                id: {type: 'string', minLength: 36, maxLength: 36},
-                title: {type: 'string', maxLength: 255}
-            }
-        }
-    }
+    //static get jsonSchema() {
+    //    return {
+    //        type: 'object',
+    //        required: ['id', 'title', 'created_at', 'updated_at'],
+    //        properties: {
+    //            id: {type: 'string', minLength: 36, maxLength: 36},
+    //            title: {type: 'string', maxLength: 255}
+    //        }
+    //    }
+    //}
 
     static get relationMappings() {
         return {
