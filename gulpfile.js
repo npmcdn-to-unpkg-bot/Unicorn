@@ -12,7 +12,7 @@ gulp.task('scripts', function () {
     var tsResult = tsProject.src() // instead of gulp.src(...)
         .pipe(ts(tsProject));
 
-    return tsResult.js.pipe(gulp.dest('release/server'));
+    return tsResult.js.pipe(gulp.dest('.'));
 });
 
 gulp.task('watch', ['scripts'], function () {
