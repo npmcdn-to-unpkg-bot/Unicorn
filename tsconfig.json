@@ -2,7 +2,10 @@
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true
   },
   "exclude": [
     "node_modules",
@@ -10,6 +13,16 @@
     "typings/main"
   ],
   "filesGlob": [
-    "./src/server/**/*.ts"
-  ]
+    "./src/server/**/*.ts",
+    "./src/client/**/*.ts",
+    "./src/client/custom_typings.d.ts",
+    "./typings/main.d.ts",
+    "./test/**/*.ts",
+    "!./node_modules/**/*.ts"
+  ],
+  "compileOnSave": false,
+  "buildOnSave": false,
+  "atom": {
+    "rewriteTsconfig": false
+  }
 }

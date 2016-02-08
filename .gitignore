@@ -3,7 +3,9 @@
 .vagrant
 .idea
 *.iml
-src/server/**/*.js
+src/**/*.js
+*.js.map
+public/assets/*.js
 !migrations/*.js
 
 

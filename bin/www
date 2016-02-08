@@ -8,6 +8,34 @@ var app = require('../src/server/app');
 var debug = require('debug')('Unicorn:server');
 var http = require('http');
 
+///**
+// * Set up Webpack
+// *
+// * Integration inspired by: https://github.com/christianalfoni/webpack-express-boilerplate/blob/master/server.js
+// */
+//const isDeveloping = process.env.NODE_ENV !== 'production';
+//
+//if (isDeveloping) {
+//    const webpackConfig = require('../webpack.config');
+//    var webpack = require('webpack');
+//    var webpackDevMiddleware = require('webpack-dev-middleware');
+//
+//    app.use(webpackDevMiddleware(webpack(webpackConfig), {
+//        publicPath: webpackConfig.output.path,
+//        contentBase: 'src',
+//        stats: {
+//            colors: true,
+//            hash: false,
+//            timings: true,
+//            chunks: false,
+//            chunkModules: false,
+//            modules: false
+//        }
+//    }));
+//}
+
+
+
 /**
  * Get port from environment and store in Express.
  */
