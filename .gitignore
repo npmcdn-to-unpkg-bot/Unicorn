@@ -1,6 +1,7 @@
 node_modules
 release
 typings
+!src/server/typings
 .vagrant
 .idea
 *.iml
