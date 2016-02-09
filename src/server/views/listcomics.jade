@@ -1,0 +1,9 @@
+extends layout
+
+block content
+
+	h1= 'some line'
+	
+	each val, index in comics
+		li
+			a(href="/viewcomic?comicId=#{val.id}")= val.title

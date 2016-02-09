@@ -1,0 +1,9 @@
+extends layout
+
+block content
+	each val, index in comic
+		h1= 'Comic: ' + val.title
+		h2= 'comicId: ' + val.id
+		form#inviteUser(name="inviteUser",method="get",action="/inviteUser")
+			input(type="hidden" name="comicId" value=val.id)
+			button#btnSubmit(type="submit") Invite user

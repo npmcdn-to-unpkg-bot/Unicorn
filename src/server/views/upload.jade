@@ -1,0 +1,6 @@
+extends layout
+
+block content
+	form(action="/saveImage", method="post", enctype="multipart/form-data")
+		input(type="file", name="uploadImage")
+		button#btnSubmit(type="submit") Upload image

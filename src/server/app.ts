@@ -11,12 +11,9 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
 var routes = require('./routes/index');
 var users = require('./routes/users');
-
 var app = express();
-
 
 // Set up our database connection
 var knexConfig = require('../../knexfile');
@@ -32,8 +29,8 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(require('less-middleware')(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(require('less-middleware')(path.join(__dirname, '../../public')));
+app.use(express.static(path.join(__dirname, '../../public')));
 app.use('/', routes);
 app.use('/users', users);
 
@@ -72,6 +69,5 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-
 
 module.exports = app;
