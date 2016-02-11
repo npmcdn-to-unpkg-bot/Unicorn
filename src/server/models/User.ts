@@ -1,28 +1,29 @@
- 'use strict';
+'use strict';
 
 import {OneToManyRelation, ManyToManyRelation} from 'objection';
 import {Comic} from './Comic';
 import {BaseModel} from './BaseModel';
 
 export class User extends BaseModel {
-    static get tableName():string {
+    static get tableName(): string {
         return 'users';
     }
 
-<<<<<<< HEAD
-        // static get jsonSchema() {
-=======
-    // static get jsonSchema() {
->>>>>>> dbb50d4c90de8ea48bc650f376885d53fa84205f
-        // return {
-            // type: 'object',
-            // required: ['id', 'username', 'created_at', 'updated_at'],
-            // properties: {
-                // id: {type: 'string', minLength: 36, maxLength: 36},
-                // username: {type: 'string', maxLength: 255}
-            // }
-        // }
-    // }
+    static get jsonSchema() {
+        return {
+            type: 'object',
+            required: ['username'],
+            properties: {
+                id: { type: 'string', minLength: 36, maxLength: 36 },
+                username: { type: 'string', maxLength: 255 }
+            }
+        }
+    }
+
+    static queryContributors() {
+        return this.query()
+            .join('comic_user', 'users.id', '=', 'comic_user.user_id');
+    }
 
     static get relationMappings() {
         return {
