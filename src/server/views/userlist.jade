@@ -4,8 +4,11 @@ block content
     h1.
         User List
     ul
-        each user, i in userlist
-            li
-                a(href="mailto:#{user.email}")= user.username
-            li
-                a(href="password")= user.password
+        each user, i in users
+            p
+                    b #{user.username}
+                ul
+                    li #{user.email}
+                    | &#x9;
+                    li #{user.password}
+      
