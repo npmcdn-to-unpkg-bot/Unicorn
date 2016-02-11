@@ -9,18 +9,13 @@ export class User extends BaseModel {
         return 'users';
     }
 
-<<<<<<< HEAD
-        // static get jsonSchema() {
-=======
     // static get jsonSchema() {
->>>>>>> dbb50d4c90de8ea48bc650f376885d53fa84205f
-        // return {
-            // type: 'object',
-            // required: ['id', 'username', 'created_at', 'updated_at'],
-            // properties: {
-                // id: {type: 'string', minLength: 36, maxLength: 36},
-                // username: {type: 'string', maxLength: 255}
-            // }
+    // return {
+        // type: 'object',
+        // required: ['id', 'username', 'created_at', 'updated_at'],
+        // properties: {
+            // id: {type: 'string', minLength: 36, maxLength: 36},
+            // username: {type: 'string', maxLength: 255}
         // }
     // }
 
