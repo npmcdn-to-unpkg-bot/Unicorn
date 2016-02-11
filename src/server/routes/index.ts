@@ -4,7 +4,9 @@ const router = express.Router();
 import {Comic} from '../models/Comic';
 import {User} from '../models/User';
 
-var multer  = require('multer')
+var uuid = require('node-uuid');
+var multer = require('multer');
+var bcrypt = require('bcryptjs');
 
 var storage =   multer.diskStorage({
   destination: function (req, file, callback) {
@@ -50,43 +52,44 @@ router.get('/signup', function(req, res, next) {
 });
 
 /* GET Userlist page. */
-router.get('/userlist', function(req, res) {
-	User.query()
-		.select('id', 'email', 'password')
-		.then(function(users) {
-			res.render(users);
+router.get('/contributors', function(req, res) {
+	User.queryContributors()
+		.returning('username', 'email', 'password')
+		.select('id', 'email', 'username')
+		.then(function(users: User[]) {
+			res.render('userlist', { users: users });
 		})
-		.catch(function(error:any){
-           console.log('Error!');
-           console.log(error);
-       });
+		.catch(function(error: any) {
+			console.log('Error!');
+			console.log(error);
+		});
 });
 
 /* POST to Add User service */
 router.post('/adduser', function(req, res) {
-	var userName = req.body.username;
-    var userEmail = req.body.useremail;
-    var userPassword = req.body.userpassword;
-
-	User.query()
-		.insert({
-			username: userName,
-			useremail: userEmail,
-			userpassword: userPassword
-		})
-
-        .then(function(user: any) {
-            console.log(user);
-        })
-        .catch(function(error: any) {
-            console.log('Error!');
-            console.log(error);
+	// https://www.npmjs.com/package/bcryptjs
+	bcrypt.genSalt(10, function(err, salt) {
+		bcrypt.hash("B4c0/\/", salt, function(err, hash) {
+			User.query()
+				.insert({
+					username: req.body.username,
+					email: req.body.useremail,
+					password: hash
+				})
+				.then(function(user) {
+					//console.log(user.password);
+					res.redirect('/contributors');
+				})
+				.catch(function(error: any) {
+					console.log('Error!');
+					console.log(error);
+					// TODO: display an error to the user
+				});
 		});
-	res.redirect("userlist");		// test: redirect to userlist on successful signup
+	});
 });
 		
 router.get('/listcomics', function(req, res, next) {
-	
 	Comic.query()
 	.then(function(comics) {
 		res.render('listcomics', { "comics": comics});
@@ -101,12 +104,6 @@ router.get('/upload', function(req, res, next) {
 		res.render('upload', { title:'upload'});
 	});
 	
-});
-
-
-
-router.get('/createuser', function(req, res, next) {
-	res.render('createuser', { title: 'Development use: Add user'});
 });
 
 router.get('/inviteUser', function(req, res, next) {
