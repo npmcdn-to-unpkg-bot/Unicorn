@@ -1,4 +1,4 @@
-'use strict';
+ 'use strict';
 
 import {OneToManyRelation, ManyToManyRelation} from 'objection';
 import {Comic} from './Comic';
@@ -9,16 +9,16 @@ export class User extends BaseModel {
         return 'users';
     }
 
-    static get jsonSchema() {
-        return {
-            type: 'object',
-            required: ['id', 'username', 'created_at', 'updated_at'],
-            properties: {
-                id: {type: 'string', minLength: 36, maxLength: 36},
-                username: {type: 'string', maxLength: 255}
-            }
-        }
-    }
+        // static get jsonSchema() {
+        // return {
+            // type: 'object',
+            // required: ['id', 'username', 'created_at', 'updated_at'],
+            // properties: {
+                // id: {type: 'string', minLength: 36, maxLength: 36},
+                // username: {type: 'string', maxLength: 255}
+            // }
+        // }
+    // }
 
     static get relationMappings() {
         return {
