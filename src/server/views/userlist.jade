@@ -2,13 +2,13 @@ extends layout
 
 block content
     h1.
-        User List
+        Contributors
     ul
-        each user, i in users
+        each user, i in userlist
             p
-                    b #{user.username}
+                    b #{user.id}
                 ul
-                    li #{user.email}
+                    li #{user.username}
                     | &#x9;
-                    li #{user.password}
+                    li #{user.email}
       
