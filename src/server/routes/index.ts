@@ -138,12 +138,11 @@ router.get('/fakelogout', function(req, res, next) {
 });
 
 router.get('/viewcomic', function(req, res, next) {
-	
 	Comic.query()
-	.where('id', req.query.comicId)
-	.then(function(comic) {
-		res.render('viewcomic', {"comic": comic});
-	});
+        .where('id', req.query.comicId)
+        .then(function(comic) {
+            res.render('viewcomic', {"comic": comic});
+        });
 	
 });
 

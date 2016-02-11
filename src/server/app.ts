@@ -5,15 +5,19 @@
 var express = require('express');
 var Model = require('objection').Model;
 var Knex = require('knex');
+var passport = require('passport');
 
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var session = require('express-session');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var app = express();
+
+require('./middleware/passport');
 
 // Set up our database connection
 var knexConfig = require('../../knexfile');
@@ -29,6 +33,18 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// Sets up authentication
+app.use(session({secret: 'keyboard cat', resave: false, saveUninitialized: true}));
+app.use(passport.initialize());
+app.use(passport.session());
+// Makes user variable available in templates.
+// Source: http://stackoverflow.com/a/20912861
+app.use(function (req, res, next) {
+    res.locals.user = req.user;
+    next();
+});
+
 app.use(require('less-middleware')(path.join(__dirname, '../../public')));
 app.use(express.static(path.join(__dirname, '../../public')));
 app.use('/', routes);
