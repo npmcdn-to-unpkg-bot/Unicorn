@@ -2,6 +2,7 @@
 
 import {OneToManyRelation, ManyToManyRelation} from 'objection';
 import {Comic} from './Comic';
+import {ComicUser} from './ComicUser';
 import {BaseModel} from './BaseModel';
 
 export class User extends BaseModel {
@@ -34,6 +35,7 @@ export class User extends BaseModel {
                     from: 'users.id',
                     to: 'comics.id',
                     through: {
+                        modelClass: ComicUser,
                         from: 'comic_user.user_id',
                         to: 'comic_user.comic_id'
                     }

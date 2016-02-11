@@ -1,0 +1,8 @@
+extends ../layout
+
+block content
+  h1='Create a comic!'
+
+  form(method='post' action='/comics')
+    input(type='text' name='title' class='form-control input-lg' placeholder='Name the comic!')
+    input(type='submit' class='btn btn-lg btn-primary' value='Continue!')

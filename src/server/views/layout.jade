@@ -20,13 +20,19 @@ html
             li
               a(href='/contributors')='Contributors'
           ul(class='nav navbar-nav navbar-right')
-            li
-              if currentUser
-                a(href='#')=currentUser.username
-              else
+            if currentUser
+              li(class='dropdown')
+                a(href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false')
+                  =currentUser.username
+                  span(class='caret')
+                ul(class='dropdown-menu')
+                  li
+                    a(href='/comics/new')='Create a comic!'
+                    a(href='#')='Log out'
+            else
+              li
                 a(href='/users/login')='Log in!'
-
-
+                
     block content
 
     script(src='https://code.jquery.com/jquery-2.2.0.min.js')
