@@ -28,19 +28,6 @@ router.post('/saveImage',function(req,res){
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    // Proof-of-concept code for inserting a new comic in the database
-    //
-    //Comic.query()
-    //    .insert({
-    //        title: 'kaboom'
-    //    })
-    //    .then(function(comic:any){
-    //        console.log(comic);
-    //    })
-    //    .catch(function(error:any){
-    //        console.log('Error!');
-    //        console.log(error);
-    //    });
     res.render('index', { title: 'Unicorn Comics!' });
 });
 
@@ -50,11 +37,11 @@ router.get('/signup', function(req, res, next) {
 });
 
 /* GET Userlist page. */
-router.get('/userlist', function(req, res) {
-	User.query()
-		.select('id', 'email')
-		.then(function(users) {
-			res.render('userlist', users);
+router.get('/contributors', function(req, res) {
+	User.queryContributors()
+		.select('id', 'email', 'username')
+		.then(function(users:User[]) {
+			res.render('userlist', {users: users});
 		})
 		.catch(function(error:any){
            console.log('Error!');

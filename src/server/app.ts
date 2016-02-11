@@ -1,7 +1,3 @@
-//import * as express from 'express';
-//import {Model} from 'objection';
-//import Knex = require('knex');
-
 var express = require('express');
 var Model = require('objection').Model;
 var Knex = require('knex');
@@ -41,7 +37,7 @@ app.use(passport.session());
 // Makes user variable available in templates.
 // Source: http://stackoverflow.com/a/20912861
 app.use(function (req, res, next) {
-    res.locals.user = req.user;
+    res.locals.currentUser = req.user;
     next();
 });
 
