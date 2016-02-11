@@ -5,5 +5,22 @@ html
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
+    nav(class='navbar navbar-default')
+      div(class='container-fluid')
+        button(type='button' class='navbar-toggle collapsed' data-toggle='collapse' data-target='#bs-example-navbar-collapse-1' aria-expanded='false')
+          span(class='sr-only')='Toggle Navigation'
+          span(class='icon-bar')
+          span(class='icon-bar')
+          span(class='icon-bar')
+        a(class='navbar-brand' href='/')='Unicorn Comics'
+        div(class='collapse navbar-collapse' id='bs-example-navbar-collapse-1')
+          ul(class='nav navbar-nav')
+            li
+              a(href='#')='Comics'
+            li
+              a(href='#')='Contributors'
+
+
     block content
+    script(src='https://code.jquery.com/jquery-2.2.0.min.js')
     script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js')
