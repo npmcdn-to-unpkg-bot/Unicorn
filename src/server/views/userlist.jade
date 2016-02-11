@@ -1,14 +1,10 @@
 extends layout
 
 block content
-    h1.
-        Contributors
-    ul
-        each user, i in userlist
-            p
-                    b #{user.id}
-                ul
-                    li #{user.username}
-                    | &#x9;
-                    li #{user.email}
-      
+
+  h1.
+    Contributor list
+  ul
+    each user in users
+      li
+        a(href="mailto:#{user.email}")= user.id + ' - ' + user.username
