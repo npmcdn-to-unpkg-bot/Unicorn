@@ -52,9 +52,9 @@ router.get('/signup', function(req, res, next) {
 /* GET Userlist page. */
 router.get('/userlist', function(req, res) {
 	User.query()
-		.select('id', 'email', 'password')
+		.select('id', 'email')
 		.then(function(users) {
-			res.render(users);
+			res.render('userlist', users);
 		})
 		.catch(function(error:any){
            console.log('Error!');
@@ -64,25 +64,23 @@ router.get('/userlist', function(req, res) {
 
 /* POST to Add User service */
 router.post('/adduser', function(req, res) {
-	var userName = req.body.username;
-    var userEmail = req.body.useremail;
-    var userPassword = req.body.userpassword;
-
 	User.query()
 		.insert({
-			username: userName,
-			useremail: userEmail,
-			userpassword: userPassword
+			username: req.body.username,
+			email: req.body.useremail,
+			password: req.body.userpassword
 		})
 
         .then(function(user: any) {
-            console.log(user);
+            // redirect to userlist on successful signup
+	        res.redirect("userlist");
         })
+
         .catch(function(error: any) {
             console.log('Error!');
             console.log(error);
+            // TODO: display an error to the user
 		});
-	res.redirect("userlist");		// test: redirect to userlist on successful signup
 });
 		
 router.get('/listcomics', function(req, res, next) {
