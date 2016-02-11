@@ -14,10 +14,7 @@ var storage =   multer.diskStorage({
     callback(null, file.fieldname + '-' + Date.now());
   }
 });
-<<<<<<< HEAD
 
-=======
->>>>>>> dbb50d4c90de8ea48bc650f376885d53fa84205f
 var upload = multer({ storage : storage}).single('uploadImage');
 
 router.post('/saveImage',function(req,res){
@@ -88,11 +85,6 @@ router.post('/adduser', function(req, res) {
 	res.redirect("userlist");		// test: redirect to userlist on successful signup
 });
 		
-<<<<<<< HEAD
-=======
-}
-
->>>>>>> dbb50d4c90de8ea48bc650f376885d53fa84205f
 router.get('/listcomics', function(req, res, next) {
 	
 	Comic.query()
@@ -117,27 +109,6 @@ router.get('/createuser', function(req, res, next) {
 	res.render('createuser', { title: 'Development use: Add user'});
 });
 
-<<<<<<< HEAD
-=======
-router.post('/adduser', function(req, res) {
-	
-	var userName = req.body.username;
-	
-	User.query()
-	.insert({
-		username: userName
-	})
-	.then(function(user:any){
-		console.log(user);
-		})
-	.catch(function(error:any){
-		console.log('Error!');
-		console.log(error);
-	});
-	
-});
-
->>>>>>> dbb50d4c90de8ea48bc650f376885d53fa84205f
 router.get('/inviteUser', function(req, res, next) {
 	
 	var comicId = req.body.comicId;
@@ -177,8 +148,5 @@ router.get('/viewcomic', function(req, res, next) {
 	});
 	
 });
-<<<<<<< HEAD
-=======
 
->>>>>>> dbb50d4c90de8ea48bc650f376885d53fa84205f
 export = router;
