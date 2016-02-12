@@ -72,6 +72,7 @@ router.get('/signup', function(req, res, next) {
 
 /* GET Contributors page. */
 router.get('/contributors', function(req, res) {
+	/*
 	var testuuid1 = uuid.v4();
 	var testuuid2 = uuid.v4();
 
@@ -100,7 +101,19 @@ router.get('/contributors', function(req, res) {
 			console.log('Test comic user could not be added!');
 			console.log(error);
 		});
+	*/
 
+	
+	User.queryContributors()
+		.then(function(users) {
+			res.render('userlist', { "users": users });
+		})
+		.catch(function(error) {
+			console.log('Error!');
+			console.log(error);
+		});
+	
+	/*
     User.queryContributors()
 		.select('user_id')						// get user_id of all comic users
 		.then(function(comic_users_id) {
@@ -121,7 +134,9 @@ router.get('/contributors', function(req, res) {
 			console.log('Error!');
 			console.log(error);
 		});
+	*/
 
+		
 });
 
 /* POST to Add User service */

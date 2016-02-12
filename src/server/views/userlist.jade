@@ -7,4 +7,4 @@ block content
   ul
     each user in users
       li
-        a(href="mailto:#{user.email}")= user.id + ' - ' + user.username
+        a(href="mailto:#{user.email}")=  user.username + ' (' + user.id + ')'
