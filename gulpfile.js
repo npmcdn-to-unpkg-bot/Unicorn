@@ -30,6 +30,6 @@ gulp.task('scripts', function () {
 });
 
 gulp.task('watch', ['scripts', 'styles'], function () {
-    gulp.watch(['./src/server/**/*.ts', './src/client/**/*.ts'], ['scripts']);
+    gulp.watch(['./src/server/**/*.ts', './public/**/*.ts'], ['scripts']);
     gulp.watch('./src/client/stylesheets/**/*.less', ['styles']);
 });

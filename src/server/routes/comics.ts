@@ -33,7 +33,7 @@ router.get('/new', function(request, response, next) {
 router.get('/:id', function(request, response, next) {
     Comic.query()
         .findById(request.params.id)
-        .eager('[users, comicPanels]')
+        .eager('[users, comicPanels.[speechBubbles]]')
         .then(function (comic) {
             response.render('comics/show', {
                 'comic': comic,
@@ -45,7 +45,7 @@ router.get('/:id', function(request, response, next) {
 router.get('/:id/edit', function(request, response, next) {
     Comic.query()
         .findById(request.params.id)
-        .eager('comicPanels')
+        .eager('comicPanels.[speechBubbles]')
         .then(function(comic){
             response.render('comics/edit', {comic: comic});
         });

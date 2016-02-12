@@ -5,6 +5,10 @@ import {ComicPanel} from "./ComicPanel";
 import {Model, OneToOneRelation} from 'objection';
 
 export class SpeechBubble extends BaseModel {
+    position_x:number;
+    position_y:number;
+    text:string;
+
     static get tableName():string {
         return 'speech_bubbles';
     }
@@ -12,7 +16,7 @@ export class SpeechBubble extends BaseModel {
     static get jsonSchema() {
         return {
             type: 'object',
-            required: ['id', 'text', 'created_at', 'updated_at'],
+            required: ['text'],
             properties: {
                 id: {type: 'string', minLength: 36, maxLength: 36},
                 created_at: {type: 'string', maxLength: 255},
@@ -33,5 +37,11 @@ export class SpeechBubble extends BaseModel {
                 }
             }
         }
+    }
+
+    get inlineStyle():string {
+        return 'top:' + this.position_y + ';' +
+            'left:' + this.position_x + ';'
+            ;
     }
 }

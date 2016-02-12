@@ -7,4 +7,10 @@ block content
     a(class='btn btn-info' href=comic.url) Back to the comic!
     a(class='btn btn-info' href=comic.manageCollaboratorsUrl) Manage collaborators
 
-  p='This is a placeholder page for editing a comic.'
+  ul(class='comic x-editor')
+    each panel in comic.comicPanels
+      li(class='-comicPanel')
+        each bubble in panel.speechBubbles
+          p(class='-speechBubble', style=bubble.inlineStyle, data-id=bubble.id) I'm not so sure about this, Rainbow.
+
+        img(src=panel.backgroundImageUrl)
