@@ -6,6 +6,9 @@ import {SpeechBubble} from "./SpeechBubble";
 import {Model, OneToOneRelation, OneToManyRelation} from 'objection';
 
 export class ComicPanel extends BaseModel {
+    comic_id:string;
+    position:number;
+
     static get tableName():string {
         return 'comic_panels';
     }
@@ -52,5 +55,9 @@ export class ComicPanel extends BaseModel {
      */
     get backgroundImageUrl():string {
         return '/images/comic-panel-placeholder.png';
+    }
+
+    get speechBubblesUrl():string {
+        return '/comics/'+ this.comic_id +'/panels/' + this.id + '/speech-bubbles'
     }
 }

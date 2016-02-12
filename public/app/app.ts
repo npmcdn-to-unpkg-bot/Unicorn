@@ -1,5 +1,6 @@
 $(document).ready(function(){
-    var speechBubbles = $('.comic.x-editor .-comicPanel .-speechBubble')
+    // Reposition speech bubbles
+    $('.comic.x-editor .-comicPanel .-speechBubble')
         .draggable({
             stop: function(event, ui) {
                 // TODO: save the position

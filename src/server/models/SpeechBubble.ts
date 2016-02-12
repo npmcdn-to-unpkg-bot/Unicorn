@@ -7,6 +7,7 @@ import {Model, OneToOneRelation} from 'objection';
 export class SpeechBubble extends BaseModel {
     position_x:number;
     position_y:number;
+    comic_panel_id:string;
     text:string;
 
     static get tableName():string {
@@ -19,9 +20,12 @@ export class SpeechBubble extends BaseModel {
             required: ['text'],
             properties: {
                 id: {type: 'string', minLength: 36, maxLength: 36},
+                comic_panel_id: {type: 'string', minLength: 36, maxLength: 36},
                 created_at: {type: 'string', maxLength: 255},
                 updated_at: {type: 'string', maxLength: 255},
-                text: {type: 'string'}
+                text: {type: 'string'},
+                position_x: {type: 'number'},
+                position_y: {type: 'number'}
             }
         }
     }

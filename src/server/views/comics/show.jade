@@ -12,7 +12,9 @@ block content
   ul(class='comic')
     each panel in comic.comicPanels
       li(class='-comicPanel')
-        p(class='-speechBubble') I'm not so sure about this, Rainbow.
+        each bubble in panel.speechBubbles
+          blockquote(class='-speechBubble', style=bubble.inlineStyle, data-id=bubble.id)=bubble.text
+
         img(src=panel.backgroundImageUrl)
 
 
