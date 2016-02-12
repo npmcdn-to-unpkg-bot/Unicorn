@@ -1,6 +1,8 @@
 Collaborative Comic Strips :: Unicorn Edition!
 ==============================================
 
+[Link to the production site](http://ubc-unicorn.deltchev.com/)
+
 Setting up a dev environment
 ----------------------------
 
