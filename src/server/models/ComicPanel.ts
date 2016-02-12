@@ -44,4 +44,13 @@ export class ComicPanel extends BaseModel {
             }
         }
     }
+
+    /**
+     * stub
+     * TODO: implement custom background images
+     * @returns {string}
+     */
+    get backgroundImageUrl():string {
+        return '/images/comic-panel-placeholder.png';
+    }
 }

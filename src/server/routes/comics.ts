@@ -33,7 +33,7 @@ router.get('/new', function(request, response, next) {
 router.get('/:id', function(request, response, next) {
     Comic.query()
         .findById(request.params.id)
-        .eager('users')
+        .eager('[users, comicPanels]')
         .then(function (comic) {
             response.render('comics/show', {
                 'comic': comic,

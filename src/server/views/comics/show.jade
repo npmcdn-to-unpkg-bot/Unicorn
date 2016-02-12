@@ -6,12 +6,10 @@ block content
   p
     a(href=comic.editUrl, class='btn btn-info') Edit this comic!
 
-  p='[Insert comic content here]'
-    ul
-      each panel in comic.comicPanels
-        li
-          span There's a panel here!
-          // render a panel
+  ul(class='comic')
+    each panel in comic.comicPanels
+      li
+        img(src=panel.backgroundImageUrl, class='-comicPanel')
 
 
 

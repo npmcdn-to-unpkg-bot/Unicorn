@@ -8,3 +8,5 @@ typings
 src/server/**/*.js
 !migrations/*.js
 *.js.map
+
+public/stylesheets/*.css

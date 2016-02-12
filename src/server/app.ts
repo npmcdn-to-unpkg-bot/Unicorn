@@ -47,7 +47,6 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.use(require('less-middleware')(path.join(__dirname, '../../public')));
 app.use(express.static(path.join(__dirname, '../../public')));
 app.use('/', routes);
 app.use('/users', users);
