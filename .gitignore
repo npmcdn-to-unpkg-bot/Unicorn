@@ -6,7 +6,7 @@ typings
 *.iml
 *.log
 src/server/**/*.js
+public/app/**/*.js
+public/css/**/*.css
 !migrations/*.js
 *.js.map
-
-public/stylesheets/*.css

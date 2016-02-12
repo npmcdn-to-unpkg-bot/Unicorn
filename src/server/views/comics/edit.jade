@@ -4,6 +4,7 @@ block content
   h1='Editing: '+comic.title
 
   p
-    a(class='btn btn-info' href='invite')='Manage collaborators'
+    a(class='btn btn-info' href=comic.url) Back to the comic!
+    a(class='btn btn-info' href=comic.manageCollaboratorsUrl) Manage collaborators
 
   p='This is a placeholder page for editing a comic.'

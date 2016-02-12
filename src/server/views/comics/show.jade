@@ -8,9 +8,9 @@ block content
 
   ul(class='comic')
     each panel in comic.comicPanels
-      li
-        img(src=panel.backgroundImageUrl, class='-comicPanel')
-
+      li(class='-comicPanel')
+        p(class='-speechBubble') I'm not so sure about this, Rainbow.
+        img(src=panel.backgroundImageUrl)
 
 
   h2= 'Contributors to this comic'

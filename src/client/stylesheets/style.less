@@ -8,15 +8,24 @@ a {
 }
 
 .comic {
+  position: relative;
   width: 500px;
   list-style: none;
-  
+
   .-comicPanel {
+    position: relative;
     width: 100%;
 
     img {
       width: 100%;
       height: auto;
+    }
+
+    .-speechBubble {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 0.5em;
+      border-radius: 1em;
     }
   }
 }

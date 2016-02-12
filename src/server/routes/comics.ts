@@ -57,7 +57,7 @@ router.get('/:id/invite', function (req, res, next) {
         .findById(req.params.id)
         .eager('users')
         .then(function(comic){
-        res.render('comics/invite-user', {comic: comic, collaborators: comic.users});
+        res.render('comics/edit-collaborators', {comic: comic, collaborators: comic.users});
     });
 });
 

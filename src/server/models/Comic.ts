@@ -71,4 +71,12 @@ export class Comic extends BaseModel {
     get editUrl():string {
         return '/comics/'+this.id+'/edit'
     }
+
+    /**
+     * Returns the relative URL to manage this comic's collaborators.
+     * @returns {string}
+     */
+    get manageCollaboratorsUrl():string {
+        return '/comics/'+this.id+'/invite'
+    }
 }

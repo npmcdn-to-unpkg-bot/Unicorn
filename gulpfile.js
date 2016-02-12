@@ -12,14 +12,14 @@ var tsProject = ts.createProject(
 );
 
 gulp.task('styles', function (){
-    return gulp.src('./public/stylesheets/**/*.less')
+    return gulp.src('./src/client/stylesheets/**/*.less')
         .pipe(sourcemaps.init())
         .pipe(less({
             paths: [path.join(__dirname, 'less', 'includes')]
         }))
         .pipe(concatCss('app.css'))
         .pipe(sourcemaps.write())
-        .pipe(gulp.dest('./public/stylesheets'));
+        .pipe(gulp.dest('./public/css'));
 });
 
 gulp.task('scripts', function () {
@@ -30,6 +30,6 @@ gulp.task('scripts', function () {
 });
 
 gulp.task('watch', ['scripts', 'styles'], function () {
-    gulp.watch('./src/server/**/*.ts', ['scripts']);
-    gulp.watch('./public/stylesheets/**/*.less', ['styles']);
+    gulp.watch(['./src/server/**/*.ts', './src/client/**/*.ts'], ['scripts']);
+    gulp.watch('./src/client/stylesheets/**/*.less', ['styles']);
 });

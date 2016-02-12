@@ -3,6 +3,9 @@ extends ../layout
 block content
   h1 Managing collaborators for: #{comic.title}
 
+  p
+    a(href=comic.editUrl, class='btn btn-info') Return to editing this comic
+
   h2 Add a new collaborator!
   form#formAddUser(name="addContributorToComic", method="post")
     input#inputUserName(type="text", placeholder="username", name="username")
