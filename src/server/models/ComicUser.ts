@@ -6,6 +6,9 @@ import {BaseModel} from './BaseModel';
 import {Comic} from "./Comic";
 
 export class ComicUser extends BaseModel {
+    comic_id:number;
+    user_id:number;
+
     static get tableName():string {
         return 'comic_user';
     }

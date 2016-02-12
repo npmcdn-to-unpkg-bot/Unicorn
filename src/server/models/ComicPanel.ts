@@ -16,6 +16,8 @@ export class ComicPanel extends BaseModel {
             required: ['id', 'position', 'created_at', 'updated_at'],
             properties: {
                 id: {type: 'string', minLength: 36, maxLength: 36},
+                created_at: {type: 'string', maxLength: 255},
+                updated_at: {type: 'string', maxLength: 255},
                 position: {type: 'integer'}
             }
         }

@@ -17,6 +17,8 @@ export class Comic extends BaseModel {
              required: ['title'],
              properties: {
                  id: {type: 'string', minLength: 36, maxLength: 36},
+                 created_at: {type: 'string', maxLength: 255},
+                 updated_at: {type: 'string', maxLength: 255},
                  title: {type: 'string', maxLength: 255}
              }
          }

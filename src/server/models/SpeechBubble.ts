@@ -15,6 +15,8 @@ export class SpeechBubble extends BaseModel {
             required: ['id', 'text', 'created_at', 'updated_at'],
             properties: {
                 id: {type: 'string', minLength: 36, maxLength: 36},
+                created_at: {type: 'string', maxLength: 255},
+                updated_at: {type: 'string', maxLength: 255},
                 text: {type: 'string'}
             }
         }

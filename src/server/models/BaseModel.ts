@@ -8,14 +8,14 @@ export class BaseModel extends Model {
     created_at:string;
     updated_at:string;
 
-    $beforeInsert() {
+    $beforeInsert(queryContext) {
         this.id = uuid.v4();
-        var date = new Date().toISOString();
-        this.created_at = date;
-        this.updated_at = date;
+        var dateString = new Date().toISOString();
+        this.created_at = dateString;
+        this.updated_at = dateString;
     };
 
-    $beforeUpdate() {
+    $beforeUpdate(queryContext) {
         this.updated_at = new Date().toISOString();
     }
 }

@@ -15,17 +15,12 @@ router.post('/', function(request, response, next) {
     Comic.query().insert({
         title: request.body.title
     }).then(function(comic:Comic){
-        ComicUser.query().insert({
+        return ComicUser.query().insert({
             user_id: request.user.id,
             comic_id: comic.id
         });
-    });
-    request.user.query().insertWithRelated({
-        title: request.body.title,
-        comics: [{is_owner: true}]
-    }).then(function(stuff) {
-        console.log(stuff);
-        response.render('comics/edit', {});
+    }).then(function(comicUser:ComicUser){
+        response.redirect('/comics/'+comicUser.comic_id+'/edit');
     });
 });
 

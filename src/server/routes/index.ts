@@ -154,11 +154,10 @@ router.post('/adduser', function(req, res) {
 		bcrypt.hash(req.body.userpassword, salt, function(err, hash) {
 			User.query()
 				.insert({
-					id: uuid.v4(),
+                    //TODO: prevent duplicate username, etc
 					username: req.body.username,
 					email: req.body.useremail,
 					password: hash
-					//TODO: prevent duplicate username, etc
 				})
 				.then(function(user) {
 					console.log("Input userid:" + user.id);
