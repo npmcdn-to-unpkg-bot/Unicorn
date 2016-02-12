@@ -16,9 +16,3 @@ indent_size = 4
 
 [*.{less,scss,sass,css,jade,ejs,html}]
 indent_size = 2
-
-# One-offs
-
-[{package.json}]
-indent_style = space
-indent_size = 2
