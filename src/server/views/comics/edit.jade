@@ -11,7 +11,7 @@ block content
     each panel in comic.comicPanels
       li(class='-comicPanel')
         each bubble in panel.speechBubbles
-          blockquote(class='-speechBubble', style=bubble.inlineStyle, data-id=bubble.id)=bubble.text
+          blockquote(class='-speechBubble', style=bubble.inlineStyle, data-id=bubble.id, data-edit-url=bubble.editUrl)=bubble.text
 
         img(src=panel.backgroundImageUrl)
         form(method='post', action=panel.speechBubblesUrl)

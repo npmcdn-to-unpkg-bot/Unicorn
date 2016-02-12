@@ -3,9 +3,16 @@ $(document).ready(function(){
     $('.comic.x-editor .-comicPanel .-speechBubble')
         .draggable({
             stop: function(event, ui) {
-                // TODO: save the position
                 var $bubble = $(this);
-                console.log($bubble.position());
+
+                $.ajax($bubble.data('edit-url'), {
+                    method: 'PUT',
+                    data: {
+                        text: $bubble.text(),
+                        position_x: $bubble.position().left,
+                        position_y: $bubble.position().top,
+                    }
+                });
             }
         });
 });

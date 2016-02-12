@@ -68,15 +68,36 @@ router.post('/:comicId/panels/:panelId/speech-bubbles', function(request, respon
     ComicPanel.query()
         .findById(request.params.panelId)
         .then(function(comicPanel:ComicPanel){
-            comicPanel.$relatedQuery('speechBubbles')
+            return comicPanel.$relatedQuery('speechBubbles')
                 .insert({
                     text: 'Twilight Sparkle is best pony!',
                     position_x: 0,
                     position_y: 0,
                 })
-                .then(function(speechBubble:SpeechBubble) {
-                    response.redirect('/comics/' + request.params.comicId + '/edit');
-                })
+        })
+        .then(function(speechBubble:SpeechBubble) {
+            response.redirect('/comics/' + request.params.comicId + '/edit');
+        });
+});
+
+
+router.put('/speech-bubbles/:id', function(request, response, next) {
+    SpeechBubble.query()
+        .findById(request.params.id)
+        .then(function(speechBubble:SpeechBubble) {
+            return speechBubble.$query().patch({
+                text: request.body.text,
+                position_x: parseInt(request.body.position_x),
+                position_y: parseInt(request.body.position_y),
+            })
+        })
+        .then(function(numUpdated:number) {
+            return SpeechBubble.query()
+                .findById(request.params.id)
+                .eager('comicPanel.comic');
+        })
+        .then(function(speechBubble:SpeechBubble) {
+            response.send({success: true});
         });
 });
 

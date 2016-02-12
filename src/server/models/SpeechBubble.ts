@@ -44,8 +44,12 @@ export class SpeechBubble extends BaseModel {
     }
 
     get inlineStyle():string {
-        return 'top:' + this.position_y + ';' +
-            'left:' + this.position_x + ';'
+        return 'top:' + this.position_y + 'px;' +
+            'left:' + this.position_x + 'px;'
             ;
+    }
+
+    get editUrl():string {
+        return '/comics/speech-bubbles/' + this.id
     }
 }

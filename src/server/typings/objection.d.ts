@@ -9,6 +9,8 @@ declare module 'objection' {
         static knex(config:any):void;
 
         $relatedQuery(queryContext:any):any;
+        $loadRelated(relationships:string):any;
+        $query():any;
     }
 
     class OneToManyRelation {}
