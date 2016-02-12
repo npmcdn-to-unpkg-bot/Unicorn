@@ -2,6 +2,8 @@ var express = require('express');
 var Model = require('objection').Model;
 var Knex = require('knex');
 var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+var ConnectRoles = require('connect-roles');
 
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -12,6 +14,8 @@ var session = require('express-session');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var comics = require('./routes/comics');
+
+var roles = new ConnectRoles();
 var app = express();
 
 require('./middleware/passport');
@@ -35,6 +39,7 @@ app.use(cookieParser());
 app.use(session({secret: 'keyboard cat', resave: false, saveUninitialized: true}));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(roles.middleware());
 // Makes user variable available in templates.
 // Source: http://stackoverflow.com/a/20912861
 app.use(function (req, res, next) {
@@ -47,6 +52,7 @@ app.use(express.static(path.join(__dirname, '../../public')));
 app.use('/', routes);
 app.use('/users', users);
 app.use('/comics', comics);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

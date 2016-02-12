@@ -16,7 +16,9 @@ export class User extends BaseModel {
             required: [ ],
             properties: {
                 id: { type: 'string', minLength: 36, maxLength: 36 },
-                username: { type: 'string', maxLength: 255 }
+                username: { type: 'string', maxLength: 255 },
+                email: { type: 'string', maxLength: 255 },
+                password: { type: 'string', maxLength: 255 }
             }
         }
     }

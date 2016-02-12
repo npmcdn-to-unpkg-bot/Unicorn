@@ -4,6 +4,7 @@ const router = express.Router();
 import {Comic} from '../models/Comic';
 import {User} from '../models/User';
 import {BaseModel} from '../models/BaseModel';
+import {ComicUser} from '../models/ComicUser';
 
 var uuid = require('node-uuid');
 var multer = require('multer');
@@ -94,25 +95,49 @@ router.get('/signup', function(req, res, next) {
 
 /* GET Contributors page. */
 router.get('/contributors', function(req, res) {
-    User.queryContributors()
-		.select('user_id')
-		.then(function(comic_user_id) {
-			return User.queryContributors()
-				.insert({
-					user_id: comic_user_id
-				})
+	var testuuid1 = uuid.v4();
+	var testuuid2 = uuid.v4();
+
+	User.query()
+		.insert({
+			id: testuuid1,
+			username: 'testcontributor'
+		})
+		.insert()({
+			id: uuid.v4(),
+			username: 'testNOTacontributor'
 		})
 		.catch(function(error) {
-			console.log('Error!');
+			console.log("Test users could not be added");
+			console.log(error);
+		});
+	//TEST fake contributor
+	ComicUser.query()
+		.insert({
+			user_id: testuuid1,
+			comic_id: testuuid2
+		})
+		.then(function() {
+		})
+		.catch(function(error) {
+			console.log('Test comic user could not be added!');
 			console.log(error);
 		});
 
-	User.query()
-		.select().from('users')
-		.whereIn('id', function() {
-			this.select('user_id').from('comic_user')
+    User.queryContributors()
+		.select('user_id')						// get user_id of all comic users
+		.then(function(comic_users_id) {
+			return User.query()					// get users who are in list comic uesrs
+				.where({
+					id: comic_users_id
+				}).select()
 		})
 		.then(function(contributors) {
+			ComicUser.query()
+				.insert({
+					user_id: contributors.id
+				})
+			//TODO: Make sure there is no existing comic_user 
 			res.render('userlist', { "users": contributors });
 		})
 		.catch(function(error) {
@@ -127,53 +152,62 @@ router.post('/adduser', function(req, res) {
 	// https://www.npmjs.com/package/bcryptjs
 	bcrypt.genSalt(10, function(err, salt) {
 		bcrypt.hash(req.body.userpassword, salt, function(err, hash) {
-                 User.query()
-					 .insert({
-						 id: uuid.v4(),
-						 username: req.body.username,
-						 email: req.body.useremail,
-						 password: hash
-					 })
-                 	.then(function(user) {
-                     console.log("Input user:" + user.username);
-                     return User.query().insert({
-						 			id: user.id,
-									username: user.username,
-						 			email: user.useremail,
-						 			password: user.password
-									})
-                     //TODO: prevent duplicate username, etc
-                 })
-                .then(function(userFromDB) {
-                    console.log("User from DB:" + userFromDB.username);
-                    //for testing purposes:
+			User.query()
+				.insert({
+					id: uuid.v4(),
+					username: req.body.username,
+					email: req.body.useremail,
+					password: hash
+					//TODO: prevent duplicate username, etc
+				})
+				.then(function(user) {
+					console.log("Input userid:" + user.id);
+					console.log("Input User:" + user.username);
+					console.log("Input Email:" + user.email);
+					console.log("Input Password:" + user.password);
                     res.redirect('/contributors');
-                    //res.redirect('/');
+                    //for testing purposes:
 				})
                 .catch(function(err) {
 					console.log('Error!');
 					console.log(err);
 					// TODO: display an error to the user
 				});
-		});
+		})
 	});
+});
+
+// /* Get LogIn page. */
+// router.get('/users/login', function(req, res, next) {
+// 	// https://truongtx.me/2014/03/29/authentication-in-nodejs-and-expressjs-with-passportjs-part-1/
+// 	if(req.user) {
+// 		// already logged in
+// 		res.redirect('/');
+// 	} else {
+// 		// not logged in
+// 		res.render('login', { title: 'Log In!' });
+// 		// clear session message
+// 		req.sess
+// 	}
+// });
+
+/* Post to User LogIn service. */
+router.post('/users/login', function(req, res) {
+
 });
 		
 router.get('/comics', function(req, res, next) {
 	Comic.query()
 	.then(function(comics) {
-		res.render('listcomics', { "comics": comics});
+		res.render('listcomics', { "comics": comics });
 	});
-	
 });
 
-router.get('/upload', function(req, res, next) {
-	
+router.get('/upload', function(req, res, next) {	
 	Comic.query()
 	.then(function(comics) {
 		res.render('upload', { title:'upload'});
 	});
-	
 });
 
 router.post('/inviteUser', function(req, res, next) {
