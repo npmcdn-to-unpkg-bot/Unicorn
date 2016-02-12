@@ -8,7 +8,7 @@ var uuid = require('node-uuid');
 var multer = require('multer');
 var bcrypt = require('bcryptjs');
 
-var storage =   multer.diskStorage({
+var storage = multer.diskStorage({
   destination: function (req, file, callback) {
     callback(null, './public/img');
   },
@@ -51,39 +51,67 @@ router.get('/signup', function(req, res, next) {
 	res.render('signup', { title: 'Sign Up!' });
 });
 
-/* GET Userlist page. */
+/* GET Contributors page. */
 router.get('/contributors', function(req, res) {
-	User.queryContributors()
-		.returning('username', 'email', 'password')
-		.select('id', 'email', 'username')
-		.then(function(users: User[]) {
-			res.render('userlist', { users: users });
+    User.queryContributors()
+		.select('user_id')
+		.then(function(comic_user_id) {
+			return User.queryContributors()
+				.insert({
+					user_id: comic_user_id
+				})
 		})
-		.catch(function(error: any) {
+		.catch(function(error) {
 			console.log('Error!');
 			console.log(error);
 		});
+
+	User.query()
+		.select().from('users')
+		.whereIn('id', function() {
+			this.select('user_id').from('comic_user')
+		})
+		.then(function(contributors) {
+			res.render('userlist', { "users": contributors });
+		})
+		.catch(function(error) {
+			console.log('Error!');
+			console.log(error);
+		});
+
 });
 
 /* POST to Add User service */
 router.post('/adduser', function(req, res) {
 	// https://www.npmjs.com/package/bcryptjs
 	bcrypt.genSalt(10, function(err, salt) {
-		bcrypt.hash("B4c0/\/", salt, function(err, hash) {
-			User.query()
-				.insert({
-					id: uuid.v4(),
-					username: req.body.username,
-					email: req.body.useremail,
-					password: hash
+		bcrypt.hash(req.body.userpassword, salt, function(err, hash) {
+                 User.query()
+					 .insert({
+						 id: uuid.v4(),
+						 username: req.body.username,
+						 email: req.body.useremail,
+						 password: hash
+					 })
+                 	.then(function(user) {
+                     console.log("Input user:" + user.username);
+                     return User.query().insert({
+						 			id: user.id,
+									username: user.username,
+						 			email: user.useremail,
+						 			password: user.password
+									})
+                     //TODO: prevent duplicate username, etc
+                 })
+                .then(function(userFromDB) {
+                    console.log("User from DB:" + userFromDB.username);
+                    //for testing purposes:
+                    res.redirect('/contributors');
+                    //res.redirect('/');
 				})
-				.then(function(user) {
-					//console.log(user.password);
-					res.redirect('/contributors');
-				})
-				.catch(function(error: any) {
+                .catch(function(err) {
 					console.log('Error!');
-					console.log(error);
+					console.log(err);
 					// TODO: display an error to the user
 				});
 		});

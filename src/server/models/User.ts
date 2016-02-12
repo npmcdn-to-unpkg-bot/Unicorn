@@ -13,7 +13,7 @@ export class User extends BaseModel {
     static get jsonSchema() {
         return {
             type: 'object',
-            required: ['username'],
+            required: [ ],
             properties: {
                 id: { type: 'string', minLength: 36, maxLength: 36 },
                 username: { type: 'string', maxLength: 255 }
