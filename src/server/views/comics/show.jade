@@ -3,8 +3,11 @@ extends ../layout
 block content
   h1= 'Comic: ' + comic.title
 
-  p
-    a(href=comic.editUrl, class='btn btn-info') Edit this comic!
+  if isContributor==true
+    p
+      a(href=comic.editUrl, class='btn btn-info') Edit this comic!
+  else
+    p Contact one of the contributors for an invite to edit this comic!
 
   ul(class='comic')
     each panel in comic.comicPanels
