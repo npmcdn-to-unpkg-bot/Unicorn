@@ -1,9 +1,20 @@
 extends layout
 
 block content
-	each val, index in comic
-		h1= 'Comic: ' + val.title
-		h2= 'comicId: ' + val.id
-		form#inviteUser(name="inviteUser",method="get",action="/inviteUser")
-			input(type="hidden" name="comicId" value=val.id)
-			button#btnSubmit(type="submit") Invite user
+	h1= 'Comic: ' + comic.title
+	h2= 'comicId: ' + comic.id
+	
+	br
+	br
+	
+	h2= 'Contributors:'
+	each user in users
+		li=user.username
+	
+	br
+	br
+	
+	form#inviteUser(name="inviteUser",method="post",action="/inviteUser")
+		input(type="hidden" name="comicId" value=comic.id)
+		input(type="hidden" name="comicTitle" value=comic.title)
+		button#btnSubmit(type="submit") Invite user

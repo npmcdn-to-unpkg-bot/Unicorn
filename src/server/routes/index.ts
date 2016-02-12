@@ -3,6 +3,7 @@ const router = express.Router();
 
 import {Comic} from '../models/Comic';
 import {User} from '../models/User';
+import {BaseModel} from '../models/BaseModel';
 
 var uuid = require('node-uuid');
 var multer = require('multer');
@@ -33,18 +34,58 @@ router.get('/', function(req, res, next) {
     // Proof-of-concept code for inserting a new comic in the database
     //
     //Comic.query()
-    //    .insert({
-    //        title: 'kaboom'
-    //    })
-    //    .then(function(comic:any){
-    //        console.log(comic);
-    //    })
-    //    .catch(function(error:any){
-    //        console.log('Error!');
-    //        console.log(error);
-    //    });
+    //   .insert({
+    //       title: 'kaboom'
+    //   })
+    //   .then(function(comic:any){
+    //       console.log(comic);
+    //   })
+    //   .catch(function(error:any){
+    //       console.log('Error!');
+    //       console.log(error);
+    //   });
     res.render('index', { title: 'Unicorn Comics!' });
 });
+
+
+
+/* POST to Add Contributor service */
+router.post('/addContributorToComic', function(req, res) {
+	console.log(req.body.username);
+	
+	User
+	.query()
+	.where('username', req.body.username)
+	.then(function (user) {
+		if (user.length != 0) {
+		
+			Comic
+			.query()
+			.where('id', req.body.comicId)
+			.then(function(comic) {
+			
+				comic[0]
+				.$relatedQuery('users')
+				.relate(user[0].id);
+				
+				// also add comic to user
+				user[0]
+				.$relatedQuery('comics')
+				.relate(comic[0].id);
+				
+			});;
+			
+		}
+	})
+	.catch(function (err) {
+		console.log(err);
+	});
+	
+});
+
+
+
+
 
 /* GET sign up page. */
 router.get('/signup', function(req, res, next) {
@@ -118,7 +159,7 @@ router.post('/adduser', function(req, res) {
 	});
 });
 		
-router.get('/listcomics', function(req, res, next) {
+router.get('/comics', function(req, res, next) {
 	Comic.query()
 	.then(function(comics) {
 		res.render('listcomics', { "comics": comics});
@@ -135,13 +176,36 @@ router.get('/upload', function(req, res, next) {
 	
 });
 
-router.get('/inviteUser', function(req, res, next) {
+router.post('/inviteUser', function(req, res, next) {
 	
 	var comicId = req.body.comicId;
-	
-	res.render('invite', {'comicId':comicId});
+	var comicTitle = req.body.comicTitle;
+		
+	res.render('invite', {'comicId':comicId, 'comicTitle':comicTitle});
 	
 });
+
+
+
+router.get('/viewcomic', function(req, res, next) {
+	
+	Comic.query()
+	.where('id', req.query.comicId)
+	.then(function(comic) {
+		console.log(comic[0]);
+		
+		comic[0].$relatedQuery('users')
+		.then(function (users) {
+			console.log(users);
+			res.render('viewcomic', {'comic':comic[0], 'users':users});			
+		});
+		
+	});
+	
+});
+
+
+/* Functions for development use */
 
 router.get('/trycookie', function(req, res, next) {
 	
@@ -165,14 +229,60 @@ router.get('/fakelogout', function(req, res, next) {
 	
 });
 
-router.get('/viewcomic', function(req, res, next) {
+router.get('/insertTestComic', function(req, res, next) {
+	Comic.query()
+       .insert({
+           title: 'kaboom'
+		})
+		.then(function(comic:any){
+           console.log(comic);
+		})
+		.catch(function(error:any){
+           console.log('Error!');
+           console.log(error);
+		});
 	
 	Comic.query()
-	.where('id', req.query.comicId)
-	.then(function(comic) {
-		res.render('viewcomic', {"comic": comic});
-	});
-	
+       .insert({
+           title: 'some comic'
+		})
+		.then(function(comic:any){
+           console.log(comic);
+		})
+		.catch(function(error:any){
+           console.log('Error!');
+           console.log(error);
+		});
 });
+
+router.get('/deleteTestComic', function(req, res, next) {
+	Comic.query()
+		.delete()
+		.then(function (numDeleted) {
+			console.log(numDeleted, 'comics were deleted');
+		})
+		.catch(function (err) {
+			console.log(err.stack);
+		});
+});
+
+router.get('/listUsers', function(req, res) {
+	User.query()
+	.then(function(users) {
+		console.log(users);
+	});
+});
+
+router.get('/deleteUsers', function(req, res) {
+	User.query()
+		.delete()
+		.then(function (numDeleted) {
+			console.log(numDeleted, 'users were deleted');
+		})
+		.catch(function (err) {
+			console.log(err.stack);
+		});
+});
+
 
 export = router;

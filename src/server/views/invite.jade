@@ -1,9 +1,11 @@
 extends layout
 
 block content
-	h1= title
-	p Inviting user to contribute on #{comicId}
+	h1 Inviting user to contribute on: #{comicTitle}
+	p ComicId: #{comicId}
 	
-	form#formAddUser(name="adduser",method="post",action="/adduser")
+	form#formAddUser(name="addContributorToComic",method="post",action="/addContributorToComic")
+		input(type="hidden" name="comicId" value=comicId)
+		input(type="hidden" name="comicTitle" value=comicTitle)
 		input#inputUserName(type="text", placeholder="username", name="username")
 		button#btnSubmit(type="submit") submit
