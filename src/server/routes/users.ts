@@ -19,12 +19,15 @@ router.post('/login', function(req, res, next) {
         .where('username', '=', req.body.username)
         .then(function(users:User[]){
             var user = users[0];
+            console.log(users);
 
             req.login(user, function (err) {
                 if (err) {
                     return next(err);
                 }
-                return res.redirect('/users/' + req.user.username);
+                // TODO: redirect to the user's profile
+                //return res.redirect('/users/' + req.user.username);
+                return res.redirect('/');
             });
         });
 });

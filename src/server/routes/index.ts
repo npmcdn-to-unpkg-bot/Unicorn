@@ -10,6 +10,7 @@ var uuid = require('node-uuid');
 var multer = require('multer');
 var bcrypt = require('bcryptjs');
 
+
 var storage = multer.diskStorage({
   destination: function (req, file, callback) {
     callback(null, './public/img');
@@ -32,19 +33,6 @@ router.post('/saveImage',function(req,res){
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    // Proof-of-concept code for inserting a new comic in the database
-    //
-    //Comic.query()
-    //   .insert({
-    //       title: 'kaboom'
-    //   })
-    //   .then(function(comic:any){
-    //       console.log(comic);
-    //   })
-    //   .catch(function(error:any){
-    //       console.log('Error!');
-    //       console.log(error);
-    //   });
     res.render('index', { title: 'Unicorn Comics!' });
 });
 
@@ -176,32 +164,6 @@ router.post('/adduser', function(req, res) {
 	});
 });
 
-// /* Get LogIn page. */
-// router.get('/users/login', function(req, res, next) {
-// 	// https://truongtx.me/2014/03/29/authentication-in-nodejs-and-expressjs-with-passportjs-part-1/
-// 	if(req.user) {
-// 		// already logged in
-// 		res.redirect('/');
-// 	} else {
-// 		// not logged in
-// 		res.render('login', { title: 'Log In!' });
-// 		// clear session message
-// 		req.sess
-// 	}
-// });
-
-/* Post to User LogIn service. */
-router.post('/users/login', function(req, res) {
-
-});
-		
-router.get('/comics', function(req, res, next) {
-	Comic.query()
-	.then(function(comics) {
-		res.render('listcomics', { "comics": comics });
-	});
-});
-
 router.get('/upload', function(req, res, next) {	
 	Comic.query()
 	.then(function(comics) {
@@ -215,25 +177,6 @@ router.post('/inviteUser', function(req, res, next) {
 	var comicTitle = req.body.comicTitle;
 		
 	res.render('invite', {'comicId':comicId, 'comicTitle':comicTitle});
-	
-});
-
-
-
-router.get('/viewcomic', function(req, res, next) {
-	
-	Comic.query()
-	.where('id', req.query.comicId)
-	.then(function(comic) {
-		console.log(comic[0]);
-		
-		comic[0].$relatedQuery('users')
-		.then(function (users) {
-			console.log(users);
-			res.render('viewcomic', {'comic':comic[0], 'users':users});			
-		});
-		
-	});
 	
 });
 
