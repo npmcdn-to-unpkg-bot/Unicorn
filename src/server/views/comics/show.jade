@@ -1,5 +1,10 @@
 extends ../layout
 
 block content
-  h1=comic.title
-  p='This is a placeholder page for viewing a single comic.'
+  h1= 'Comic: ' + comic.title
+
+  p='[Insert comic content here]'
+
+  h2= 'Contributors to this comic'
+  each user in users
+    li=user.username

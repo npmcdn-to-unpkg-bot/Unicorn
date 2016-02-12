@@ -171,15 +171,6 @@ router.get('/upload', function(req, res, next) {
 	});
 });
 
-router.post('/inviteUser', function(req, res, next) {
-	
-	var comicId = req.body.comicId;
-	var comicTitle = req.body.comicTitle;
-		
-	res.render('invite', {'comicId':comicId, 'comicTitle':comicTitle});
-	
-});
-
 
 /* Functions for development use */
 

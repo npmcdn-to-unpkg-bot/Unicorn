@@ -9,7 +9,7 @@ import {ComicUser} from '../models/ComicUser';
 router.get('/', function (req, res, next) {
     Comic.query()
         .then(function (comics) {
-            res.render('listcomics', {"comics": comics});
+            res.render('comics/index', {comics: comics});
         });
 });
 
@@ -32,25 +32,29 @@ router.get('/new', function(request, response, next) {
 
 router.get('/:id', function(request, response, next) {
     Comic.query()
-        .where('id', request.params.id)
+        .findById(request.params.id)
+        .eager('users')
         .then(function (comic) {
-            console.log(comic[0]);
-
-            comic[0].$relatedQuery('users')
-                .then(function (users) {
-                    console.log(users);
-                    response.render('viewcomic', {
-                        'comic': comic[0],
-                        'users': users
-                    });
-                });
-
+            response.render('comics/show', {
+                'comic': comic,
+                'users': comic.users
+            });
         });
 });
 
 router.get('/:id/edit', function(request, response, next) {
     var comic = Comic.query().findById(request.params.id);
     response.render('comics/edit', {comic: comic});
+});
+
+
+router.get('/:id/invite', function (req, res, next) {
+    Comic.query()
+        .findById(req.params.id)
+        .eager('users')
+        .then(function(comic){
+        res.render('comics/invite-user', {comic: comic, collaborators: comic.users});
+    });
 });
 
 export = router;

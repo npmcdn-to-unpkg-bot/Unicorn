@@ -1,0 +1,9 @@
+extends ../layout
+
+block content
+
+	h1= 'Comics'
+	
+	each comic in comics
+		li
+			a(href="/comics/#{comic.id}")= comic.title
