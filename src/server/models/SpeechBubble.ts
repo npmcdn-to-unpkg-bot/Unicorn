@@ -52,4 +52,8 @@ export class SpeechBubble extends BaseModel {
     get editUrl():string {
         return '/comics/speech-bubbles/' + this.id
     }
+
+    get deleteUrl():string {
+        return '/comics/speech-bubbles/' + this.id
+    }
 }

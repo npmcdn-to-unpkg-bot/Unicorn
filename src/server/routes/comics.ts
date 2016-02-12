@@ -141,4 +141,12 @@ router.put('/speech-bubbles/:id', function(request, response, next) {
         });
 });
 
+router.delete('/speech-bubbles/:id', function(request, response, next) {
+    SpeechBubble.query()
+        .deleteById(request.params.id)
+        .then(function(speechBubble:SpeechBubble) {
+            response.send({success: true});
+        });
+});
+
 export = router;

@@ -12,6 +12,7 @@ block content
       li(class='-comicPanel')
         each bubble in panel.speechBubbles
           blockquote(class='-speechBubble', style=bubble.inlineStyle, data-id=bubble.id, data-edit-url=bubble.editUrl)=bubble.text
+            a(class='-delete glyphicon glyphicon-trash', href='#', data-delete-url=bubble.deleteUrl)
 
         img(src=panel.backgroundImageUrl)
         form(method='post', action=panel.speechBubblesUrl)

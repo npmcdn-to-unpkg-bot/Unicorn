@@ -15,4 +15,19 @@ $(document).ready(function(){
                 });
             }
         });
+
+
+    $('.comic.x-editor .-comicPanel .-speechBubble .-delete')
+        .on('click', function(event) {
+            event.preventDefault();
+            var $trashButton = $(this);
+
+            $.ajax({
+                url: $trashButton.data('delete-url'),
+                method: 'DELETE',
+                success: function() {
+                    $trashButton.parent().remove()
+                }
+            })
+        })
 });
