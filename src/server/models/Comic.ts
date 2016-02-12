@@ -49,4 +49,26 @@ export class Comic extends BaseModel {
             }
         }
     }
+
+    $afterInsert(queryContext) {
+        return this
+            .$relatedQuery('comicPanels')
+            .insert({position: 0});
+    }
+
+    /**
+     * Returns the relative URL to view this comic.
+     * @returns {string}
+     */
+    get url():string {
+        return '/comics/'+this.id
+    }
+
+    /**
+     * Returns the relative URL to edit this comic.
+     * @returns {string}
+     */
+    get editUrl():string {
+        return '/comics/'+this.id+'/edit'
+    }
 }

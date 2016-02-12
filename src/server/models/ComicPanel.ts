@@ -13,9 +13,10 @@ export class ComicPanel extends BaseModel {
     static get jsonSchema() {
         return {
             type: 'object',
-            required: ['id', 'position', 'created_at', 'updated_at'],
+            required: ['position'],
             properties: {
                 id: {type: 'string', minLength: 36, maxLength: 36},
+                comic_id: {type: 'string', minLength: 36, maxLength: 36},
                 created_at: {type: 'string', maxLength: 255},
                 updated_at: {type: 'string', maxLength: 255},
                 position: {type: 'integer'}

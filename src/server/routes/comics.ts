@@ -14,16 +14,16 @@ router.get('/', function (req, res, next) {
 });
 
 router.post('/', function(request, response, next) {
-    Comic.query().insert({
-        title: request.body.title
-    }).then(function(comic:Comic){
-        return ComicUser.query().insert({
-            user_id: request.user.id,
-            comic_id: comic.id
+    Comic.query()
+        .insert({title: request.body.title})
+        .then(function (comic:Comic) {
+            return ComicUser.query().insert({
+                user_id: request.user.id,
+                comic_id: comic.id
+            });
+        }).then(function (comicUser:ComicUser) {
+            response.redirect('/comics/' + comicUser.comic_id + '/edit');
         });
-    }).then(function(comicUser:ComicUser){
-        response.redirect('/comics/'+comicUser.comic_id+'/edit');
-    });
 });
 
 router.get('/new', function(request, response, next) {
@@ -43,8 +43,12 @@ router.get('/:id', function(request, response, next) {
 });
 
 router.get('/:id/edit', function(request, response, next) {
-    var comic = Comic.query().findById(request.params.id);
-    response.render('comics/edit', {comic: comic});
+    Comic.query()
+        .findById(request.params.id)
+        .eager('comicPanels')
+        .then(function(comic){
+            response.render('comics/edit', {comic: comic});
+        });
 });
 
 

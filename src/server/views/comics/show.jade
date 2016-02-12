@@ -3,8 +3,19 @@ extends ../layout
 block content
   h1= 'Comic: ' + comic.title
 
+  p
+    a(href=comic.editUrl, class='btn btn-info') Edit this comic!
+
   p='[Insert comic content here]'
+    ul
+      each panel in comic.comicPanels
+        li
+          span There's a panel here!
+          // render a panel
+
+
 
   h2= 'Contributors to this comic'
-  each user in users
-    li=user.username
+  ul
+    each user in users
+      li=user.username
