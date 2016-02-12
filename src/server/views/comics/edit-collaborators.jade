@@ -7,7 +7,8 @@ block content
     a(href=comic.editUrl, class='btn btn-info') Return to editing this comic
 
   h2 Add a new collaborator!
-  form#formAddUser(name="addContributorToComic", method="post")
+  form#formAddUser(name="addContributorToComic", method="post", action="/addContributorToComic")
+    input#inputUserName(type="hidden", name="comicId", value=comic.id)
     input#inputUserName(type="text", placeholder="username", name="username")
     button#btnSubmit(type="submit") submit
 

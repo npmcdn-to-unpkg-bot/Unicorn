@@ -40,32 +40,21 @@ router.get('/', function(req, res, next) {
 
 /* POST to Add Contributor service */
 router.post('/addContributorToComic', function(req, res) {
-	console.log(req.body.username);
 	
 	User
 	.query()
 	.where('username', req.body.username)
 	.then(function (user) {
-		if (user.length != 0) {
 		
-			Comic
-			.query()
-			.where('id', req.body.comicId)
-			.then(function(comic) {
-			
-				comic[0]
-				.$relatedQuery('users')
-				.relate(user[0].id);
-				
-				// also add comic to user
-				user[0]
-				.$relatedQuery('comics')
-				.relate(comic[0].id);
-				
-			});;
-			
-		}
+		return ComicUser.query().insert({
+			user_id: user[0].id,
+			comic_id: req.body.comicId
+		});
+		
 	})
+	.then(function (comicUser:ComicUser) {
+        res.redirect('/comics/' + comicUser.comic_id + '/edit');
+    })
 	.catch(function (err) {
 		console.log(err);
 	});
