@@ -33,15 +33,55 @@ router.get('/new', function(request, response, next) {
 });
 
 router.get('/:id', function(request, response, next) {
-    Comic.query()
+    
+	// if statements doesn't seems to execute in query, have some duplicated code for now
+	if (request.user == null) {
+	
+		Comic.query()
         .findById(request.params.id)
         .eager('[users, comicPanels.[speechBubbles]]')
         .then(function (comic) {
-            response.render('comics/show', {
-                'comic': comic,
-                'users': comic.users
-            });
+			response.render('comics/show', {
+				'comic': comic,
+				'users': comic.users,
+				'isContributor': false
+			});
         });
+		
+	}
+	else {
+	
+		Comic.query()
+			.findById(request.params.id)
+			.eager('[users, comicPanels.[speechBubbles]]')
+			.then(function (comic) {
+				comic
+				.$relatedQuery('users')
+				.where('comic_user.user_id', request.user.id)
+				.then(function (user) {
+					var isContributor = false;
+					if (user.length != 0) {
+						isContributor = true;
+					}
+					else {
+						isContributor = false;
+					}
+					
+					// 'comic' after relatedQuery seems to change the comic, requery for now 
+					Comic.query()
+						.findById(request.params.id)
+						.eager('[users, comicPanels.[speechBubbles]]')
+						.then(function (comic) {
+							response.render('comics/show', {
+								'comic': comic,
+								'users': comic.users,
+								'isContributor': isContributor
+							});
+						});
+				});
+			});
+	
+	}
 });
 
 router.get('/:id/edit', function(request, response, next) {

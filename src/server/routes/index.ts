@@ -104,14 +104,31 @@ router.get('/contributors', function(req, res) {
 	*/
 
 	
-	User.queryContributors()
+	
+	User
+	.query()
+		.join('comic_user', 'users.id', '=', 'comic_user.user_id')
+		// .groupBy('user_id')
+		
 		.then(function(users) {
+			console.log(users);
 			res.render('userlist', { "users": users });
 		})
 		.catch(function(error) {
 			console.log('Error!');
 			console.log(error);
 		});
+	
+	// User.queryContributors()
+		// .groupBy('user_id')
+		// .then(function(users) {
+			// console.log(users);
+			// res.render('userlist', { "users": users });
+		// })
+		// .catch(function(error) {
+			// console.log('Error!');
+			// console.log(error);
+		// });
 	
 	/*
     User.queryContributors()
@@ -253,6 +270,13 @@ router.get('/deleteUsers', function(req, res) {
 		.catch(function (err) {
 			console.log(err.stack);
 		});
+});
+
+router.get('/listcomicuser', function(req, res) {
+	ComicUser.query()
+	.then(function(comicusers) {
+		console.log(comicusers);
+	});
 });
 
 
