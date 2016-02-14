@@ -4,6 +4,7 @@ var Knex = require('knex');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var ConnectRoles = require('connect-roles');
+var flash = require('connect-flash');
 
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -17,8 +18,6 @@ var comics = require('./routes/comics');
 
 var roles = new ConnectRoles();
 var app = express();
-
-require('./middleware/passport');
 
 // Set up our database connection
 var knexConfig = require('../../knexfile');
@@ -39,6 +38,7 @@ app.use(cookieParser());
 app.use(session({secret: 'keyboard cat', resave: false, saveUninitialized: true}));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash());
 app.use(roles.middleware());
 // Makes user variable available in templates.
 // Source: http://stackoverflow.com/a/20912861
@@ -89,4 +89,5 @@ app.use(function(err, req, res, next) {
   });
 });
 
+module.exports = passport;
 module.exports = app;

@@ -61,15 +61,6 @@ router.post('/addContributorToComic', function(req, res) {
 	
 });
 
-
-
-
-
-/* GET sign up page. */
-router.get('/signup', function(req, res, next) {
-	res.render('signup', { title: 'Sign Up!' });
-});
-
 /* GET Contributors page. */
 router.get('/contributors', function(req, res) {
 	/*
@@ -103,8 +94,8 @@ router.get('/contributors', function(req, res) {
 		});
 	*/
 
-	
-	
+
+
 	User
 	.query()
 		.join('comic_user', 'users.id', '=', 'comic_user.user_id')
@@ -151,40 +142,10 @@ router.get('/contributors', function(req, res) {
 			console.log('Error!');
 			console.log(error);
 		});
-	*/
-
-		
+	*/		
 });
 
-/* POST to Add User service */
-router.post('/adduser', function(req, res) {
-	// https://www.npmjs.com/package/bcryptjs
-	bcrypt.genSalt(10, function(err, salt) {
-		bcrypt.hash(req.body.userpassword, salt, function(err, hash) {
-			User.query()
-				.insert({
-                    //TODO: prevent duplicate username, etc
-					username: req.body.username,
-					email: req.body.useremail,
-					password: hash
-				})
-				.then(function(user) {
-					console.log("Input userid:" + user.id);
-					console.log("Input User:" + user.username);
-					console.log("Input Email:" + user.email);
-					console.log("Input Password:" + user.password);
-                    res.redirect('/contributors');
-                    //for testing purposes:
-				})
-                .catch(function(err) {
-					console.log('Error!');
-					console.log(err);
-					// TODO: display an error to the user
-				});
-		})
-	});
-});
-
+/* GET upload a comic. */
 router.get('/upload', function(req, res, next) {	
 	Comic.query()
 	.then(function(comics) {

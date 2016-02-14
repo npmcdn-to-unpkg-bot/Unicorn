@@ -13,6 +13,20 @@ export class ComicUser extends BaseModel {
         return 'comic_user';
     }
 
+    static get jsonSchema() {
+        return {
+            type: 'object',
+            required: [],
+            properties: {
+                id: { type: 'string', minLength: 36, maxLength: 36 },
+                comic_id: { type: 'string', minLength: 36, maxLength: 36 },
+                user_id: { type: 'string', minLength: 36, maxLength: 36 },
+                is_owner: { type: 'boolean'},
+               
+            }
+        }
+    }
+
     static get relationMappings() {
         return {
             comics: {
@@ -28,7 +42,7 @@ export class ComicUser extends BaseModel {
                 modelClass: User,
                 join: {
                     from: 'comic_user.user_id',
-                    to: 'users.user_id',
+                    to: 'users.id',
                 }
             },
         }
