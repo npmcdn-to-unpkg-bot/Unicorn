@@ -11,6 +11,24 @@ router.get('/', function(req, res, next) {
     res.render('users/index', {user : req.user});
 });
 
+/* GET Contributors page. */
+router.get('/contributors', function(req, res) {
+
+    User
+        .query()
+        .join('comic_user', 'users.id', '=', 'comic_user.user_id')
+        // .groupBy('user_id')
+
+        .then(function(users) {
+            console.log(users);
+            res.render('users/userlist', { "users": users });
+        })
+        .catch(function(error) {
+            console.log('Error!');
+            console.log(error);
+        });
+
+});
 
 /* GET sign up page. */
 router.get('/signup', function(req, res, next) {
@@ -20,7 +38,7 @@ router.get('/signup', function(req, res, next) {
 /* Get sign up page. */
 router.post('/adduser',
     passport.authenticate('local-signup', {
-        successRedirect: '/profile',
+        successRedirect: '/users/profile',
         failureRedirect: '/users/signup',
         failureFlash: true        // allow flash messages
     })
@@ -48,8 +66,8 @@ router.get('/login', function(req, res) {
 
 /* POST to Login User service. */
 router.post('/loginUser', passport.authenticate('local-login', {
-        successRedirect:'/profile',
-        failureRedirect: '/user/login',
+        successRedirect:'/users/profile',
+        failureRedirect: '/users/login',
         failureFlash: true
 
 }));

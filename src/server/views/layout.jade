@@ -18,7 +18,7 @@ html
             li
               a(href='/comics')='Comics'
             li
-              a(href='/contributors')='Contributors'
+              a(href='/users/contributors')='Contributors'
           ul(class='nav navbar-nav navbar-right')
             if currentUser
               li(class='dropdown')
@@ -28,7 +28,7 @@ html
                 ul(class='dropdown-menu')
                   li
                     a(href='/comics/new')='Create a comic!'
-                    a(href='#')='Log out'
+                    a(href='/users/logout')='Log out'
             else
               li
                 a(href='/users/signup')='Sign up!'
