@@ -61,6 +61,7 @@ router.post('/addContributorToComic', function(req, res) {
 	
 });
 
+
 /* GET upload a comic. */
 router.get('/upload', function(req, res, next) {	
 	Comic.query()
