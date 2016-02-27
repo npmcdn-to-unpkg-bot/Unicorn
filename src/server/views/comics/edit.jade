@@ -11,8 +11,10 @@ block content
     each panel in comic.comicPanels
       li(class='-comicPanel')
         each bubble in panel.speechBubbles
-          blockquote(class='-speechBubble', style=bubble.inlineStyle, data-id=bubble.id, data-edit-url=bubble.editUrl)=bubble.text
+          blockquote(class='-speechBubble', style=bubble.inlineStyle, data-id=bubble.id, data-edit-url=bubble.editUrl)
+            span(class='-text')=bubble.text
             a(class='-delete glyphicon glyphicon-trash', href='#', data-delete-url=bubble.deleteUrl)
+            a(class='-edit glyphicon glyphicon-pencil', href='#')
 
         img(src=panel.backgroundImageUrl)
         form(method='post', action=panel.speechBubblesUrl)
