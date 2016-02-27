@@ -22,7 +22,8 @@ export class ComicUser extends BaseModel {
                 comic_id: { type: 'string', minLength: 36, maxLength: 36 },
                 user_id: { type: 'string', minLength: 36, maxLength: 36 },
                 is_owner: { type: 'boolean'},
-               
+                created_at: {type: 'string', maxLength: 255},
+                updated_at: {type: 'string', maxLength: 255},
             }
         }
     }
