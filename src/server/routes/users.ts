@@ -17,7 +17,7 @@ router.get('/contributors', function(req, res) {
     User
         .query()
         .join('comic_user', 'users.id', '=', 'comic_user.user_id')
-        // .groupBy('user_id')
+        .distinct('user_id', 'username')
 
         .then(function(users) {
             console.log(users);

@@ -45,18 +45,33 @@ router.post('/addContributorToComic', function(req, res) {
 	.query()
 	.where('username', req.body.username)
 	.then(function (user) {
-		
-		return ComicUser.query().insert({
-			user_id: user[0].id,
-			comic_id: req.body.comicId
-		});
-		
-	})
-	.then(function (comicUser:ComicUser) {
-        res.redirect('/comics/' + comicUser.comic_id + '/edit');
+
+        return ComicUser.query()
+            .insert({
+                user_id: user[0].id,
+                comic_id: req.body.comicId
+            })
+        })
+
+	.then(function () {
+
+        Comic.query()
+            .findById(req.body.comicId)
+            .eager('users')
+            .then(function(comic){
+                res.render('comics/edit-collaborators', {comic: comic, collaborators: comic.users, message: 'The user is now a contributor to this comic!', messageColour: '#00FF1A'});
+            });
+
     })
 	.catch(function (err) {
-		console.log(err);
+
+        Comic.query()
+            .findById(req.body.comicId)
+            .eager('users')
+            .then(function(comic){
+                res.render('comics/edit-collaborators', {comic: comic, collaborators: comic.users, message: 'Make sure the user exists and is not already a contributor to this comic.', messageColour: '#FF0000'});
+            });
+
 	});
 	
 });
@@ -72,28 +87,6 @@ router.get('/upload', function(req, res, next) {
 
 
 /* Functions for development use */
-
-router.get('/trycookie', function(req, res, next) {
-	
-	req.cookies = {userName:'John',passWord:'somepass'};
-	//req.cookies = "username=John Doe:password=somepass";
-	console.log("Cookies: ", req.cookies);
-	
-});
-
-router.get('/fakelogin', function(req, res, next) {
-	
-	req.cookies = {userName:'john',id:'95833617-57d7-420f-adba-a2e96d6f908a'};
-	console.log("Cookies: ", req.cookies);
-	
-});
-
-router.get('/fakelogout', function(req, res, next) {
-	
-	req.cookies = {};
-	console.log("Cookies: ", req.cookies);
-	
-});
 
 router.get('/insertTestComic', function(req, res, next) {
 	Comic.query()
@@ -157,5 +150,11 @@ router.get('/listcomicuser', function(req, res) {
 	});
 });
 
+router.get('/listComics', function(req, res) {
+    Comic.query()
+        .then(function(comics) {
+            console.log(comics);
+        });
+});
 
 export = router;

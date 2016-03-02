@@ -6,6 +6,14 @@ block content
   p
     a(href=comic.editUrl, class='btn btn-info') Return to editing this comic
 
+  style.
+    messageText {
+      font-size: 20px;
+      color: #{messageColour}
+    }
+
+  messageText #{message}
+
   h2 Add a new collaborator!
   form#formAddUser(name="addContributorToComic", method="post", action="/addContributorToComic")
     input#inputUserName(type="hidden", name="comicId", value=comic.id)
