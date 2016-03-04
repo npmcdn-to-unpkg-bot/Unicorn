@@ -11,3 +11,5 @@ block content
 	each comic in comics
 		li
 			a(href=comic.url)= comic.title
+	if (comics.length == 0)
+		h3 No Results

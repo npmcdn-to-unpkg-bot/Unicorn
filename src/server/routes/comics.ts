@@ -46,17 +46,35 @@ router.post('/', function(request, response, next) {
         });
 });
 
+function notEmpty(value) {
+    return value != "";
+}
+
 router.post('/searchcomic', function(request, response, next) {
+    var searchKeyWords = [];
+    searchKeyWords = request.body.comicname.split(" ").filter(notEmpty);
+
     Comic.query()
         .then(function (comics) {
+            var notUsedComicList = comics;
             var newComicList = [];
-            for (var i = 0; i < comics.length; i++) {
-                if (comics[i].title.indexOf(request.body.comicname) > -1) {
-                    newComicList.push(comics[i]);
+
+            for (var j = 0; j < searchKeyWords.length; j ++) {
+                var tempComicList = [];
+                for (var i = 0; i < notUsedComicList.length; i++) {
+                    if (notUsedComicList[i].title.indexOf(searchKeyWords[j]) > -1) {
+                        newComicList.push(notUsedComicList[i]);
+                    }
+                    else {
+                        tempComicList.push(notUsedComicList[i]);
+                    }
                 }
+                notUsedComicList = tempComicList;
             }
+
             response.render('comics/index', {comics: newComicList});
         });
+
 });
 
 router.get('/new', function(request, response, next) {
