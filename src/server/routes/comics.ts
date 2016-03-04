@@ -28,6 +28,19 @@ router.post('/', function(request, response, next) {
         });
 });
 
+router.post('/searchcomic', function(request, response, next) {
+    Comic.query()
+        .then(function (comics) {
+            var newComicList = [];
+            for (var i = 0; i < comics.length; i++) {
+                if (comics[i].title.indexOf(request.body.comicname) > -1) {
+                    newComicList.push(comics[i]);
+                }
+            }
+            response.render('comics/index', {comics: newComicList});
+        });
+});
+
 router.get('/new', function(request, response, next) {
     response.render('comics/new');
 });

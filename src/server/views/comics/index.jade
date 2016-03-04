@@ -3,7 +3,11 @@ extends ../layout
 block content
 
 	h1= 'Comics'
-	
+
+	form#formAddUser(name="searchcomic",method="post",action="/comics/searchcomic")
+		input#inputUserName(type="text", placeholder="comic name", name="comicname")
+		button#btnSubmit(type="submit") Search
+
 	each comic in comics
 		li
 			a(href=comic.url)= comic.title

@@ -4,10 +4,7 @@ var User = require('../models/User').User;
 var bcrypt = require('bcrypt');
 
     passport.serializeUser(function(user, done) {
-            console.log(user[0]);
-        console.log(user[0].id);
-        //done(null, user.id);    // only user id stored in session
-        done(null, user[0].id);
+        done(null, user.id);        // user id stored in session
     });
 
     passport.deserializeUser(function(id, done) {
@@ -45,7 +42,7 @@ var bcrypt = require('bcrypt');
                 })
                 .catch(function(err) {
                     console.log('Username exists already');
-                    done(null, false, req.flash('signupMessage', 'That username is already taken.'));
+                    done(null, false, req.flash('signupMessage', 'That username is already taken. Please choose another one.'));
                 });
              })
         }));
@@ -66,17 +63,17 @@ var bcrypt = require('bcrypt');
                         // username exists
                         if (bcrypt.compareSync(password, passwordDB)) {
                             console.log('logging in...');
-                            done(null, user);
+                            done(null, user[0]);
                         } else {
                             console.log('wrong password');
-                            done(null, false);
+                            done(null, false, req.flash('loginMessage', 'Wrong username and password combination.' ));
                         }
                     
                 })
                 .catch(function(err) {
                     // username doesnt exist
                     console.log('no user found');
-                    done(null, false, req.flash('loginMessage', 'Wrong password.'));
+                    done(null, false, req.flash('loginMessage', 'Wrong username and password combination.'));
                 });
         }
     ));
