@@ -2,6 +2,8 @@ extends ../layout
 
 block content
     h1= title
+    -if(message)
+      div#note #{message}
     form#fLogin(name="login",method="post",action="/users/login")
         input#inputUserName(type="text", placeholder="user name", name="username")
         input#inputUserPassword(type="password", placeholder="password", name="userpassword")
