@@ -13,7 +13,7 @@ var bcrypt = require('bcryptjs');
 
 var storage = multer.diskStorage({
   destination: function (req, file, callback) {
-    callback(null, './public/img');
+    callback(null, './public/images');
   },
   filename: function (req, file, callback) {
     callback(null, file.fieldname + '-' + Date.now());
@@ -25,6 +25,7 @@ var upload = multer({ storage : storage}).single('uploadImage');
 router.post('/saveImage',function(req,res){
     upload(req,res,function(err) {
         if(err) {
+			console.log(err);
             return res.end("Error uploading file.");
         }
         res.end("File is uploaded");

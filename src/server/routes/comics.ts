@@ -8,6 +8,24 @@ import {ComicUser} from '../models/ComicUser';
 import {ComicPanel} from '../models/ComicPanel';
 import {SpeechBubble} from "../models/SpeechBubble";
 
+// handling user background image uploads
+var multer = require('multer');
+var bcrypt = require('bcryptjs');
+
+
+var storage = multer.diskStorage({
+  destination: function (req, file, callback) {
+    callback(null, './public/images');
+  },
+  filename: function (req, file, callback) {
+    // this is dulplicated in replace-background-image handler
+    callback(null, req.body.comicPanelId+req.body.bginame+'.png');
+  }
+});
+
+var upload = multer({ storage : storage}).single('uploadImage');
+
+// Show all comics
 router.get('/', function (req, res, next) {
     Comic.query()
         .then(function (comics) {
@@ -160,6 +178,24 @@ router.delete('/speech-bubbles/:id', function(request, response, next) {
         .then(function(speechBubble:SpeechBubble) {
             response.send({success: true});
         });
+});
+
+router.post('/:comicPanelId/replace-background-image',function(req,res){
+    upload(req,res,function(err) {
+        if(err) {
+            return res.end("Error uploading file.");
+        }
+		
+		ComicPanel.query()
+			.patch({background_image_url: '/images/'+req.params.comicPanelId+req.body.bginame + '.png'})
+			.where('id','=',req.params.comicPanelId)
+			.then(function (numUpdated) {
+				console.log(numUpdated, "comic panels were updated (should be 1, since it is replacing a background image)");
+			}).catch(function (err) {
+			console.log(err.stack);
+		    });
+        res.end("File is uploaded");
+    });
 });
 
 export = router;

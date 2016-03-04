@@ -53,7 +53,7 @@ export class Comic extends BaseModel {
     $afterInsert(queryContext) {
         return this
             .$relatedQuery('comicPanels')
-            .insert({position: 0});
+            .insert({position: 0, background_image_url: '/images/comic-panel-placeholder.png'});
     }
 
     /**

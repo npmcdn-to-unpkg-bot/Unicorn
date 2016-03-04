@@ -8,6 +8,7 @@ import {Model, OneToOneRelation, OneToManyRelation} from 'objection';
 export class ComicPanel extends BaseModel {
     comic_id:string;
     position:number;
+	background_image_url:string;
 
     static get tableName():string {
         return 'comic_panels';
@@ -16,13 +17,14 @@ export class ComicPanel extends BaseModel {
     static get jsonSchema() {
         return {
             type: 'object',
-            required: ['position'],
+            required: ['position','background_image_url'],
             properties: {
                 id: {type: 'string', minLength: 36, maxLength: 36},
                 comic_id: {type: 'string', minLength: 36, maxLength: 36},
                 created_at: {type: 'string', maxLength: 255},
                 updated_at: {type: 'string', maxLength: 255},
-                position: {type: 'integer'}
+                position: {type: 'integer'},
+				background_image_url: {type: 'string',maxLength: 255}
             }
         }
     }
@@ -48,13 +50,12 @@ export class ComicPanel extends BaseModel {
         }
     }
 
-    /**
-     * stub
-     * TODO: implement custom background images
-     * @returns {string}
-     */
     get backgroundImageUrl():string {
-        return '/images/comic-panel-placeholder.png';
+        return this.background_image_url;
+    }
+	
+	get replaceBgiUrl():string {
+        return '/comics/' + this.id + '/replace-background-image';
     }
 
     get speechBubblesUrl():string {

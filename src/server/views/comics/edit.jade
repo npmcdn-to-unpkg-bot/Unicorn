@@ -8,7 +8,7 @@ block content
     a(class='btn btn-info' href=comic.manageCollaboratorsUrl) Manage collaborators
 
   ul(class='comic x-editor')
-    each panel in comic.comicPanels
+    each panel, index in comic.comicPanels
       li(class='-comicPanel')
         each bubble in panel.speechBubbles
           blockquote(class='-speechBubble', style=bubble.inlineStyle, data-id=bubble.id, data-edit-url=bubble.editUrl)
@@ -19,3 +19,17 @@ block content
         img(src=panel.backgroundImageUrl)
         form(method='post', action=panel.speechBubblesUrl)
           input(type='submit', class='btn btn-info addSpeechBubble', value='Add a speech bubble!')
+        div.panel-group
+          div.panel.panel-default
+            div.panel-heading
+              h4.panel-title
+                a(data-toggle="collapse", href='#edit-panel-'+index) Options
+            div(id='edit-panel-'+index, class="panel-collapse collapse")
+              div.panel-body
+                form(role='form' method='post', action=panel.replaceBgiUrl, enctype="multipart/form-data")
+                  div.form-group
+                    input(type='hidden', name="comicPanelId", value=panel.id)
+                    label(for="bgiName") Replace your background image!
+                    input.form-control(type="text" name="bginame", id="bginame", placeholder="Give your background image a cute name!")
+                    input(type="file", name="uploadImage")
+                  button(type='submit', class='btn btn-default replaceBgi') Replace now!
