@@ -24,3 +24,5 @@ block content
   ul
     each user in collaborators
       li=user.username
+        if user.id != owner.id
+          span DELETE THIS

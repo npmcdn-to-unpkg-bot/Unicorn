@@ -39,7 +39,8 @@ router.post('/', function(request, response, next) {
         .then(function (comic:Comic) {
             return ComicUser.query().insert({
                 user_id: request.user.id,
-                comic_id: comic.id
+                comic_id: comic.id,
+                is_owner: true
             });
         }).then(function (comicUser:ComicUser) {
             response.redirect('/comics/' + comicUser.comic_id + '/edit');
@@ -144,12 +145,26 @@ router.get('/:id/edit', function(request, response, next) {
 
 
 router.get('/:id/invite', function (req, res, next) {
+    var comic:Comic;
+    var owner:User;
+
     Comic.query()
         .findById(req.params.id)
         .eager('users')
-        .then(function(comic){
-        res.render('comics/edit-collaborators', {comic: comic, collaborators: comic.users});
-    });
+        .then(function(returnedComic){
+            comic = returnedComic;
+            return comic.owner;
+        })
+        .then(function(comicOwner){
+            owner = comicOwner;
+            console.log(comicOwner);
+            console.log(comic.users);
+            res.render('comics/edit-collaborators', {
+                comic: comic,
+                collaborators: comic.users,
+                owner: comicOwner
+            });
+        });
 });
 
 

@@ -57,6 +57,22 @@ export class Comic extends BaseModel {
     }
 
     /**
+     * Returns this comic's owner.
+     *
+     * @returns {User}
+     */
+    get owner():User {
+        return User
+            .query()
+            .whereExists(
+                ComicUser.query()
+                    .where('comic_id', this.id)
+                    .where('is_owner', true)
+            )
+            .first();
+    }
+
+    /**
      * Returns the relative URL to view this comic.
      * @returns {string}
      */
