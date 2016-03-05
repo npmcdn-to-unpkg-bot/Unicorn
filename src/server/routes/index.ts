@@ -39,44 +39,6 @@ router.get('/', function(req, res, next) {
 
 
 
-/* POST to Add Contributor service */
-router.post('/addContributorToComic', function(req, res) {
-	
-	User
-	.query()
-	.where('username', req.body.username)
-	.then(function (user) {
-
-        return ComicUser.query()
-            .insert({
-                user_id: user[0].id,
-                comic_id: req.body.comicId
-            })
-        })
-
-	.then(function () {
-
-        Comic.query()
-            .findById(req.body.comicId)
-            .eager('users')
-            .then(function(comic){
-                res.render('comics/edit-collaborators', {comic: comic, collaborators: comic.users, message: 'The user is now a contributor to this comic!', messageColour: '#00FF1A'});
-            });
-
-    })
-	.catch(function (err) {
-
-        Comic.query()
-            .findById(req.body.comicId)
-            .eager('users')
-            .then(function(comic){
-                res.render('comics/edit-collaborators', {comic: comic, collaborators: comic.users, message: 'Make sure the user exists and is not already a contributor to this comic.', messageColour: '#FF0000'});
-            });
-
-	});
-	
-});
-
 
 /* GET upload a comic. */
 router.get('/upload', function(req, res, next) {	

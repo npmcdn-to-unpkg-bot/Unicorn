@@ -93,6 +93,6 @@ export class Comic extends BaseModel {
      * @returns {string}
      */
     get manageCollaboratorsUrl():string {
-        return '/comics/'+this.id+'/invite'
+        return '/comics/'+this.id+'/collaborators'
     }
 }

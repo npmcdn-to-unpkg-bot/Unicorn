@@ -144,7 +144,7 @@ router.get('/:id/edit', function(request, response, next) {
 });
 
 
-router.get('/:id/invite', function (req, res, next) {
+router.get('/:id/collaborators', function (req, res, next) {
     var comic:Comic;
     var owner:User;
 
@@ -157,8 +157,6 @@ router.get('/:id/invite', function (req, res, next) {
         })
         .then(function(comicOwner){
             owner = comicOwner;
-            console.log(comicOwner);
-            console.log(comic.users);
             res.render('comics/edit-collaborators', {
                 comic: comic,
                 collaborators: comic.users,
@@ -166,6 +164,32 @@ router.get('/:id/invite', function (req, res, next) {
             });
         });
 });
+
+
+/* POST to Add Contributor service */
+router.post('/:id/collaborators', function (req, res) {
+    User
+        .query()
+        .where('username', req.body.username)
+        .first()
+        .then(function (user) {
+            return ComicUser.query()
+                .insert({
+                    user_id: user.id,
+                    comic_id: req.body.comicId
+                })
+        })
+
+        .then(function (comicUser:ComicUser) {
+            console.log(comicUser.comic);
+            return res.redirect(comicUser.comic.manageCollaboratorsUrl);
+        })
+        .catch(function (err) {
+            console.log(err);
+        });
+
+});
+
 
 
 router.post('/:comicId/panels/:panelId/speech-bubbles', function(request, response, next) {

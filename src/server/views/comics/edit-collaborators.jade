@@ -15,7 +15,7 @@ block content
   messageText #{message}
 
   h2 Add a new collaborator!
-  form#formAddUser(name="addContributorToComic", method="post", action="/addContributorToComic")
+  form#formAddUser(name="addContributorToComic", method="post", action=comic.manageCollaboratorsUrl)
     input#inputUserName(type="hidden", name="comicId", value=comic.id)
     input#inputUserName(type="text", placeholder="username", name="username")
     button#btnSubmit(type="submit") submit
