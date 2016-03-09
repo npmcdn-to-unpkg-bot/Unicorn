@@ -3,6 +3,11 @@ extends ../layout
 block content
   h1= 'Comic: ' + comic.title
 
+  -if(flash.alreadySaved)
+    .alert.alert-info #{flash.alreadySaved}
+  -if(flash.favouriteSuccess)
+    .alert.alert-success #{flash.favouriteSuccess}
+
   if isContributor==true
     p
       a(href=comic.editUrl, class='btn btn-info') Edit this comic!
@@ -17,6 +22,9 @@ block content
             span(class='-text')=bubble.text
         img(src=panel.backgroundImageUrl)
 
+  if isLoggedIn==true
+    p
+      a(href=comic.favouriteUrl, class='btn btn-info') Favourite this comic!
 
   h2= 'Contributors to this comic'
   ul

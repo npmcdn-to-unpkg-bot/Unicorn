@@ -3,31 +3,50 @@ extends ../layout
 block content
   .page-header
     .col-sm-1
-    h3 Profile Information
+    h1 Profile Information
+    h3 Basic Information
   form(class='form-horizontal', action='/users/update', method='POST')
-    -if(updateFailure)
-      div#note #{updateFailure}
-    -if(updateSuccess)
-      div#note #{updateSuccess}
     .form-group
       label.col-sm-2.control-label(for='username') Username
       .col-sm-4
         div.controls
-          input.form-control(type='text', name='username', placeholder='#{user.username}')
-        -if(updateFailure)
-          div#note #{updateFailure}
+          p #{user.username}
+    .form-group
+      label.col-sm-2.control-label(for='fullname') Fullname
+      .col-sm-4
+        div-controls
+          p #{user.fullname}
     .form-group
       label.col-sm-2.control-label(for='email') Email
       .col-sm-4
         div.controls
-          input.form-control(type='text', name='useremail', placeholder='#{user.email}')
+          p #{user.email}
     .form-group
       label.col-sm-2.control-label(for='password') Password
       .col-sm-4
         div.controls
-          input.form-control(type='password', name='userpassword', placeholder='*****')
+          p *****
+    .form-group
+      label.col-sm-2.control-label(for='location') Location
+      .col-sm-4
+        div-controls
+          p #{user.location}
+    .form-group
+      label.col-sm-2.control-label(for='gender') Gender
+      .col-sm-5
+        div-controls
+          -if(user.gender=='Male')
+            p Male
+          -if(user.gender=='Female')
+            p Female
+          -if(user.gender=='Other')
+            p Other
     .form-group
       .col-sm-offset-2.col-sm-4
-        button.btn.btn.btn-primary(type='submit')
-          i.fa.fa-magnet
-          | Update Profile
+        a(href='/users/update', class='btn btn-info') Edit profile
+
+    h3 Favourited Comics
+    ul
+    each savedComic in savedComics
+      li
+        a(href='/comics/#{savedComic.comic_id}')= savedComic.comic_id

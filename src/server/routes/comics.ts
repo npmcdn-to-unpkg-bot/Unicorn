@@ -7,6 +7,7 @@ import {User} from '../models/User';
 import {ComicUser} from '../models/ComicUser';
 import {ComicPanel} from '../models/ComicPanel';
 import {SpeechBubble} from "../models/SpeechBubble";
+import {SavedComic} from '../models/SavedComic';
 
 // handling user background image uploads
 var multer = require('multer');
@@ -48,7 +49,7 @@ router.post('/', function(request, response, next) {
 });
 
 function notEmpty(value) {
-    return value != "";
+	return value != "";
 }
 
 router.post('/searchcomic', function(request, response, next) {
@@ -82,57 +83,91 @@ router.get('/new', function(request, response, next) {
     response.render('comics/new');
 });
 
-router.get('/:id', function(request, response, next) {
+router.get('/:id', function(request, response, next) {    
+    // if statements doesn't seems to execute in query, have some duplicated code for now
+    if (request.user == null) {
     
-	// if statements doesn't seems to execute in query, have some duplicated code for now
-	if (request.user == null) {
-	
-		Comic.query()
+        Comic.query()
         .findById(request.params.id)
         .eager('[users, comicPanels.[speechBubbles]]')
         .then(function (comic) {
-			response.render('comics/show', {
-				'comic': comic,
-				'users': comic.users,
-				'isContributor': false
-			});
+            var flash = request.flash();
+
+            response.render('comics/show', {
+                'comic': comic,
+                'users': comic.users,
+                'isContributor': false,
+                'flash' : flash
+            });
         });
-		
-	}
-	else {
-	
-		Comic.query()
-			.findById(request.params.id)
-			.eager('[users, comicPanels.[speechBubbles]]')
-			.then(function (comic) {
-				comic
-				.$relatedQuery('users')
-				.where('comic_user.user_id', request.user.id)
-				.then(function (user) {
-					var isContributor = false;
-					if (user.length != 0) {
-						isContributor = true;
-					}
-					else {
-						isContributor = false;
-					}
-					
-					// 'comic' after relatedQuery seems to change the comic, requery for now 
-					Comic.query()
-						.findById(request.params.id)
-						.eager('[users, comicPanels.[speechBubbles]]')
-						.then(function (comic) {
-							response.render('comics/show', {
-								'comic': comic,
-								'users': comic.users,
-								'isContributor': isContributor
-							});
-						});
-				});
-			});
-	
-	}
+        
+    }
+    else {
+
+        Comic.query()
+            .findById(request.params.id)
+            .eager('[users, comicPanels.[speechBubbles]]')
+            .then(function (comic) {
+                comic
+                .$relatedQuery('users')
+                .where('comic_user.user_id', request.user.id)
+                .then(function (user) {
+                    var flash = request.flash();
+                    var isContributor = false;
+                    if (user.length != 0) {
+                        isContributor = true;
+                    }
+                    else {
+                        isContributor = false;
+                    }
+                    
+                    // 'comic' after relatedQuery seems to change the comic, requery for now 
+                    Comic.query()
+                        .findById(request.params.id)
+                        .eager('[users, comicPanels.[speechBubbles]]')
+                        .then(function (comic) {
+                            response.render('comics/show', {
+                                'user' : request.user,
+                                'comic': comic,
+                                'users': comic.users,
+                                'isContributor': isContributor,
+                                'isLoggedIn' : true,
+                                'flash' : flash
+                            });
+                        });
+                });
+            });
+    
+    }
 });
+
+router.get('/:id/favourite', function(request, response, next) {
+    User.query()
+        .where('id', '=', request.user.id)
+        .then(function(user) {
+            console.log(user);
+
+            return user[0].$relatedQuery('savedComics')
+                .returning('*')
+                .insert({
+                    user_id: user[0].id,
+                    comic_id: request.params.id
+                })
+        })
+        .then(function(savedComic) {
+            console.log(savedComic.user_id);
+            console.log(savedComic.comic_id);
+            request.flash('favouriteSuccess', 'Comic favourited to your account!');
+            response.redirect('/comics/' + request.params.id);
+        })    
+        .catch(function(err) {
+            console.log('Error');
+            console.log(err);
+            request.flash('alreadySaved', 'This comic has already been favourited.');
+            response.redirect('/comics/' + request.params.id);
+        });
+
+})
 
 router.get('/:id/edit', function(request, response, next) {
     Comic.query()
@@ -142,7 +177,6 @@ router.get('/:id/edit', function(request, response, next) {
             response.render('comics/edit', {comic: comic});
         });
 });
-
 
 router.get('/:id/collaborators', function (req, res, next) {
     var comic:Comic;
@@ -189,8 +223,6 @@ router.post('/:id/collaborators', function (req, res) {
         });
 
 });
-
-
 
 router.post('/:comicId/panels/:panelId/speech-bubbles', function(request, response, next) {
     ComicPanel.query()

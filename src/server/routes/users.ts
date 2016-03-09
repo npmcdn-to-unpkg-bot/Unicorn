@@ -14,8 +14,7 @@ router.get('/', function(req, res, next) {
 
 /* GET Contributors page. */
 router.get('/contributors', function(req, res) {
-    User
-        .query()
+    User.query()
         .join('comic_user', 'users.id', '=', 'comic_user.user_id')
         .distinct('user_id', 'username')
 
@@ -60,25 +59,48 @@ router.post('/login', passport.authenticate('local-login', {
     successRedirect: '/users/profile',
     failureRedirect: '/users/login',
     failureFlash: true
-})
+}) 
 );
 
 /* Get profile page. */
 router.get('/profile', function(req, res) {
-    console.log('flash message: ' + req.flash('failUsername'));
-    console.log('flash message: ' + req.flash('updateSuccess'));
-    res.render('users/profile', {
-        user: req.user,
-        updateFailure: req.flash('failUsername'),
-        updateSuccess: req.flash('updateSuccess')
-    });
+    User.query()
+        .where('id', '=', req.user.id)
+        .then(function(user) {
+            console.log(user);
+
+            return user[0].$relatedQuery('savedComics')
+                .where('user_id', '=', req.user.id)
+                .select('comic_id')
+        })
+        .then(function(savedComicIds) {
+            res.render('users/profile', { 
+                savedComics: savedComicIds,
+                user: req.user 
+            });
+        })
+        .catch(function(err) {
+            console.log('Error');
+            console.log(err);
+            res.render('users/profile', { user: req.user });
+        });
 });
 
 /* GET log out. */
-router.get('/logout', function(req, res) {8
+router.get('/logout', function(req, res) {
     req.logout();
     res.redirect('/');
 });
+
+/* GET update user. */
+router.get('/update', function(req, res) {
+    var flash = req.flash();
+
+    res.render('users/updateprofile', {
+        user: req.user,
+        flash: flash
+    });
+})
 
 /* POST update user. */
 router.post('/update', function(req, res) {
@@ -92,11 +114,14 @@ router.post('/update', function(req, res) {
             .where('id', req.user.id)
             .then(function(count) {
                 console.log('Username updated');
-                return req.flash('updateSuccess', 'User information updated.');
-            })
+                req.flash('updateSuccess', 'User information updated.');
+
+             })
             .catch(function(err) {
-                console.log('Username already exists. Please choose another one.');
-                req.flash('failUsername', 'Username already exists. Please choose another one.');
+                console.log('Username already exists');
+                console.log(err);
+                req.flash('usernameFail', 'Username already exists. Please choose another one.');
+                res.redirect('/users/profile');
             });
     }
 
@@ -112,7 +137,8 @@ router.post('/update', function(req, res) {
             })
             .catch(function(err) {
                 console.log('The email is already associated with another account.');
-                req.flash('updateFailure', 'The email is already associated with another account.');
+                req.flash('emailFail', 'The email is already associated with another account.');
+                res.redirect('/users/profile');
             });
     }
 
@@ -129,10 +155,66 @@ router.post('/update', function(req, res) {
             .catch(function(err) {
                 console.log('Error');
                 console.log(err);
+                req.flash('passwordFail', 'Please choose a different password.');
+                res.redirect('/users/profile');
             });
     }
 
-    res.redirect('/users/profile');   
+    if (req.body.location) {
+        User.query()
+            .update({
+                location: req.body.location
+            })
+            .where('id', req.user.id)
+            .then(function(count) {
+                console.log('Location updated to:' + req.body.location);
+                req.flash('updateSuccess', 'User information updated.');
+            })
+            .catch(function(err) {
+                console.log('Error');
+                console.log(err);
+                req.flash('locationFail', 'Location error.');
+                res.redirect('/users/profile');
+            });
+    }
+
+    if (req.body.gender) {
+        User.query()
+            .update({
+                gender: req.body.gender
+            })
+            .where('id', req.user.id)
+            .then(function(count) {
+                console.log('Gender updated to:' + req.body.gender);
+                req.flash('updateSuccess', 'User information updated.');
+            })
+            .catch(function(err) {
+                console.log('Error');
+                console.log(err);
+                req.flash('genderFail', 'Please choose one.');
+                res.redirect('/users/profile');
+            });
+    }
+
+    if (req.body.fullname) {
+        User.query()
+            .update({
+                fullname: req.body.fullname
+            })
+            .where('id', req.user.id)
+            .then(function(count) {
+                console.log('Fullname updated to:' + req.body.fullname);
+                req.flash('updateSuccess', 'User information updated.');
+            })
+            .catch(function(err) {
+                console.log('Error');
+                console.log(err);
+                req.flash('fullnameFail', 'Please enter your name.');
+                res.redirect('/users/profile');
+            });
+    }
+    res.redirect('/users/profile');
+
 });
 
 export = router;

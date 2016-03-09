@@ -53,7 +53,7 @@ export class Comic extends BaseModel {
     $afterInsert(queryContext) {
         return this
             .$relatedQuery('comicPanels')
-            .insert({position: 0, background_image_url: '/images/comic-panel-placeholder.png'});
+            .insert({ position: 0, background_image_url: '/images/comic-panel-placeholder.png'})
     }
 
     /**
@@ -71,7 +71,7 @@ export class Comic extends BaseModel {
             )
             .first();
     }
-
+    
     /**
      * Returns the relative URL to view this comic.
      * @returns {string}
@@ -94,5 +94,13 @@ export class Comic extends BaseModel {
      */
     get manageCollaboratorsUrl():string {
         return '/comics/'+this.id+'/collaborators'
+    }
+
+    /**
+     * Returns the relative URL to favourite this comic.
+     * @returns {string}
+     */
+    get favouriteUrl(): string {
+        return '/comics/' + this.id + '/favourite'
     }
 }
