@@ -9,6 +9,7 @@ export class ComicPanel extends BaseModel {
     comic_id:string;
     position:number;
 	background_image_url:string;
+	title:string;
 
     static get tableName():string {
         return 'comic_panels';
@@ -24,7 +25,8 @@ export class ComicPanel extends BaseModel {
                 created_at: {type: 'string', maxLength: 255},
                 updated_at: {type: 'string', maxLength: 255},
                 position: {type: 'integer'},
-				background_image_url: {type: 'string',maxLength: 255}
+				background_image_url: {type: 'string',maxLength: 255},
+				title: {type: 'string',maxLength: 255}
             }
         }
     }
@@ -60,5 +62,14 @@ export class ComicPanel extends BaseModel {
 
     get speechBubblesUrl():string {
         return '/comics/'+ this.comic_id +'/panels/' + this.id + '/speech-bubbles'
+    }
+		
+	
+	/**
+     * Returns the relative URL to delete an existing panel of this comic.
+     * @returns {string}
+     */
+    get deletePanelUrl():string {
+        return '/comics/'+this.id+'/delete-panel'
     }
 }

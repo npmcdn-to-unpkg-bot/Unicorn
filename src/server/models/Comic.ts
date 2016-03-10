@@ -103,4 +103,13 @@ export class Comic extends BaseModel {
     get favouriteUrl(): string {
         return '/comics/' + this.id + '/favourite'
     }
+
+	/**
+     * Returns the relative URL to add a new panel to this comic.
+     * @returns {string}
+     */
+    get addPanelUrl():string {
+        return '/comics/'+this.id+'/add-panel'
+    }
+	
 }

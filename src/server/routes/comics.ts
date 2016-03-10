@@ -19,8 +19,25 @@ var storage = multer.diskStorage({
     callback(null, './public/images');
   },
   filename: function (req, file, callback) {
-    // this is dulplicated in replace-background-image handler
-    callback(null, req.body.comicPanelId+req.body.bginame+'.png');
+	var mt = file.mimetype;
+	var slashPos = mt.indexOf("/");
+	var extension = mt.substring(slashPos+1);
+	if (mt.substring(0,slashPos)!="image") {
+		throw new Error('Upload file not an image!');
+	}
+	var panelId = req.params.comicPanelId;
+	ComicPanel.query().findById(panelId).then(function(panel:ComicPanel) {
+		var title = req.body.panelTitle.substring(0,255) || panel.title || '';
+		ComicPanel.query()
+			.patch({background_image_url: '/images/' + panelId + '.' + extension, title: title})
+			.where('id','=',panelId)
+			.then(function (numUpdated) {
+				console.log(numUpdated, "comic panels were updated (it should actually be 1, since it is replacing a background image)");
+			}).catch(function (err) {
+				console.log(err.stack);
+			});
+	});
+    callback(null, req.body.comicPanelId + '.' + extension);
   }
 });
 
@@ -92,7 +109,7 @@ router.get('/:id', function(request, response, next) {
         .eager('[users, comicPanels.[speechBubbles]]')
         .then(function (comic) {
             var flash = request.flash();
-
+			sortComicPanels(comic);
             response.render('comics/show', {
                 'comic': comic,
                 'users': comic.users,
@@ -126,6 +143,7 @@ router.get('/:id', function(request, response, next) {
                         .findById(request.params.id)
                         .eager('[users, comicPanels.[speechBubbles]]')
                         .then(function (comic) {
+							sortComicPanels(comic);
                             response.render('comics/show', {
                                 'user' : request.user,
                                 'comic': comic,
@@ -170,11 +188,15 @@ router.get('/:id/favourite', function(request, response, next) {
 })
 
 router.get('/:id/edit', function(request, response, next) {
+	// this is the query string
+	var status = request.query.status;
     Comic.query()
         .findById(request.params.id)
         .eager('comicPanels.[speechBubbles]')
         .then(function(comic){
-            response.render('comics/edit', {comic: comic});
+			sortComicPanels(comic);
+            response.render('comics/edit', {comic: comic, status: status});
+			console.log(comic.comicPanels);
         });
 });
 
@@ -269,22 +291,206 @@ router.delete('/speech-bubbles/:id', function(request, response, next) {
         });
 });
 
-router.post('/:comicPanelId/replace-background-image',function(req,res){
-    upload(req,res,function(err) {
-        if(err) {
-            return res.end("Error uploading file.");
-        }
-		
-		ComicPanel.query()
-			.patch({background_image_url: '/images/'+req.params.comicPanelId+req.body.bginame + '.png'})
-			.where('id','=',req.params.comicPanelId)
-			.then(function (numUpdated) {
-				console.log(numUpdated, "comic panels were updated (should be 1, since it is replacing a background image)");
-			}).catch(function (err) {
-			console.log(err.stack);
-		    });
-        res.end("File is uploaded");
-    });
+router.post('/:comicPanelId/replace-background-image',function(req,res,next){
+	var status_str = "BGStatusUnknown"
+	var panelId = req.params.comicPanelId;
+	// the following three 'step_x' functions are called asynchronously but in this exact order
+	function step1UpdateBackground() {
+		// Image upload with some simple checking. Please see definition of var storage = multer.diskStorage.
+		// 		Here it's using domain module to catch all async errors thrown in multer processing
+		var d = require('domain').create()
+		d.on('error', function(err){
+			// custom not-an-image error is thrown in multer processing
+			console.log(err);
+			status_str = "BGRemind";
+			step3RespondToUser();
+		})
+		d.run(function() {
+			// starts multer processing
+			upload(req,res,function(err) {
+				if(err) {
+					// any non-custom error happened in multer processing
+					console.log(err);
+					status_str = "BGRetry";
+				}
+				// update title regardless
+				status_str = "BGAllGood";
+				step2UpdateTitle();
+			});
+		})
+	}
+	function step2UpdateTitle() {
+		ComicPanel.query().findById(panelId).then(function(panel:ComicPanel) {
+			// guard against the possibility of panelTitle and/or panel.title being empty/null
+			var title = req.body.panelTitle || panel.title || '';
+			title = title.substring(0,255);
+			ComicPanel.query()
+				.patch({title: title})
+				.where('id','=',panelId)
+				.then(function (numUpdated) {
+					console.log(numUpdated, "comic panels were updated (it should actually be 1, since it is replacing a background image)");
+					status_str = (status_str==="BGAllGood") ? "BGAllGood" : "BGRetry";
+					step3RespondToUser();
+				}).catch(function (err) {
+					console.log(err.stack);
+					status_str = (status_str==="BGAllGood") ? "BGRetry" : status_str;
+					step3RespondToUser();
+				});
+		});
+	}
+	function step3RespondToUser() {
+		ComicPanel
+			.query()
+			.findById(panelId)
+			.then(function(panel:ComicPanel){
+				status_str = encodeURIComponent(status_str);
+				res.redirect('/comics/' + panel.comic_id + '/edit' + '/?status=' + status_str);
+			})
+	}
+	step1UpdateBackground();
 });
+
+router.post('/:comicId/add-panel', function(req,res) {
+	var comicId = req.params.comicId;
+	var status_str = 'PanelStatusUnknown';
+	Comic.query()
+		.findById(comicId)
+		.eager('comicPanels')
+		.then(function(comic) {
+			// panel position starts from 0
+			comic
+			.$relatedQuery('comicPanels')
+			.insert({comic_id: comicId, position: comic.comicPanels.length, background_image_url: '/images/comic-panel-placeholder.png'})
+			.then(function(test) {
+				status_str = 'PanelAdded';
+				respondToUser();
+			}).catch(function(err){
+				console.log(err);
+				status_str = 'PanelRetry';
+				respondToUser();
+			});
+		}).catch(function (err) {
+			console.log(err.stack);
+			status_str = 'PanelRetry';
+			respondToUser();
+		});
+	
+	function respondToUser() {
+		res.redirect('/comics/' + comicId + '/edit' + '/?status=' + status_str);
+	}
+})
+
+router.post('/:panelId/delete-panel', function(req,res) {
+	var panelId = req.params.panelId;
+	var status_str = 'PanelStatusUnknown';
+	var comicId = req.body.comicId;		// hidden field in the submit form
+	console.log(panelId);
+	var comicId;
+	// the following three functions are called asynchronously but in this exact order
+	function step0() {
+		// asynchronously delete all speech-bubbles on this panel
+		ComicPanel.query().findById(panelId).then(function(panel){
+			panel.$relatedQuery('speechBubbles').then(function(speechBubbles) {
+				var promises = [];
+				// created promises to delete each speech bubble
+				speechBubbles.forEach(function(element){
+					console.log(speechBubbles);
+					var p = new Promise(function (resolve, reject) {
+						SpeechBubble.query()
+							.deleteById(element.id)
+							.then(function(speechBubble:SpeechBubble) {
+								console.log('Speech Bubble (id '+ element.id + ') deleted');
+								resolve('Speech Bubble (id '+ element.id + ') deleted');
+							}).catch(function(err){
+								reject(err);
+							});
+					});
+					promises.push(p);
+				});
+				Promise.all(promises).then(function(results) {
+					console.log(results);
+					step1();
+				}, function(err) {
+					console.log(err);
+					respondToUser();
+				});
+			}).catch(function(err) {
+				// catch panel query error
+				console.log(err);
+				respondToUser();
+			});
+		}).catch(function(err){
+			// catch ComicPanel query error
+			console.log(err);
+			respondToUser();
+		});
+	}
+	function step1() {
+		// asynchronously delete a panel with NO speech-bubbles
+		ComicPanel.query().deleteById(panelId).then(function(numDeleted){
+			console.log("There are "+numDeleted+" panels deleted. Expected: 1");
+			console.log('step1() ends');
+			step2();
+		}).catch(function(err){
+			console.log(err);
+			status_str = 'PanelNotDeleted'; 
+			respondToUser();
+		});		
+	}
+	function step2() {
+		// asynchronously re-number the positions of panels
+		Comic.query().findById(comicId).then(function(comic) {
+			comic.$relatedQuery('comicPanels').orderBy('position').then(function(comicPanels) {
+				console.log('step2() starts');
+				var i;
+				for (i=0; i<comicPanels.length; i++) {
+					comicPanels[i].position = i;
+				}
+				// asynchronously update database
+				var promises = [];
+				comicPanels.forEach(function(panel){
+					var p = new Promise(function(resolve,reject){
+						ComicPanel.query().patch({position: panel.position}).where('id','=',panel.id)
+							.then(function(numberOfAffectedRows){
+								console.log("Panel id="+panel.id+" now has position "+panel.position+" NUM UPDATED = "+numberOfAffectedRows);
+								resolve("Panel id="+panel.id+" now has position "+panel.position+" NUM UPDATED = "+numberOfAffectedRows);
+							}).catch(function(err){
+								console.log(err);
+								reject({err:err});
+							});
+					});
+					promises.push(p);
+				});
+				Promise.all(promises).then(function(results){
+					console.log(results);
+					status_str = 'PanelDeleted';
+					respondToUser();
+				}, function(reason){
+					console.log(reason);
+					// status_str = 'PanelFailedRenumber';
+					status_str = 'PanelNotDeleted';
+					respondToUser();
+				});
+				
+			}).catch(function(err){
+				console.log(err);
+				respondToUser();
+			});
+		});
+	}
+	function respondToUser() {
+		res.redirect('/comics/' + comicId + '/edit' + '/?status=' + status_str);
+	}
+	step0();
+})
+
+// helper functions
+function sortComicPanels(comic) {
+	comic.comicPanels = comic.comicPanels.sort(function (a,b) {return a.position - b.position});
+}
+
+function forLoopIndexClosure(arr,i) {
+	return arr[i];
+}
 
 export = router;
