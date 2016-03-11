@@ -6,11 +6,6 @@ import {User} from '../models/User';
 
 var bcrypt = require('bcryptjs');
 
-    
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-    res.render('users/index', {user : req.user});
-});
 
 /* GET Contributors page. */
 router.get('/contributors', function(req, res) {
@@ -31,9 +26,10 @@ router.get('/contributors', function(req, res) {
 
 /* GET sign up page. */
 router.get('/signup', function(req, res, next) {
+    var flash = req.flash();
     res.render('users/signup', {
         title: 'Sign Up!',
-        message: req.flash('signupMessage')
+        flash : flash
     });
 });
 
@@ -48,15 +44,16 @@ router.post('/adduser',
 
 /* GET login page. */
 router.get('/login', function(req, res) {
+    var flash = req.flash();
     res.render('users/login', {
         title: 'Log in!',
-        message: req.flash('loginMessage')
+        flash: flash
     });
 });
 
 /* POST to Login User service. */
 router.post('/login', passport.authenticate('local-login', {
-    successRedirect: '/users/profile',
+    successRedirect: '/',
     failureRedirect: '/users/login',
     failureFlash: true
 }) 
@@ -114,8 +111,7 @@ router.post('/update', function(req, res) {
             .where('id', req.user.id)
             .then(function(count) {
                 console.log('Username updated');
-                req.flash('updateSuccess', 'User information updated.');
-
+                return req.flash('updateSuccess', 'User information updated.');
              })
             .catch(function(err) {
                 console.log('Username already exists');
@@ -133,7 +129,7 @@ router.post('/update', function(req, res) {
             .where('id', req.user.id)
             .then(function(count) {
                 console.log('Email updated');
-                req.flash('updateSuccess', 'User information updated.');
+                return req.flash('updateSuccess', 'User information updated.');
             })
             .catch(function(err) {
                 console.log('The email is already associated with another account.');
@@ -150,7 +146,7 @@ router.post('/update', function(req, res) {
             .where('id', req.user.id)
             .then(function(count) {
                 console.log('Password updated to:' + req.body.userpassword);
-                req.flash('updateSuccess', 'User information updated.');
+                return req.flash('updateSuccess', 'User information updated.');
             })
             .catch(function(err) {
                 console.log('Error');
@@ -168,7 +164,7 @@ router.post('/update', function(req, res) {
             .where('id', req.user.id)
             .then(function(count) {
                 console.log('Location updated to:' + req.body.location);
-                req.flash('updateSuccess', 'User information updated.');
+                return req.flash('updateSuccess', 'User information updated.');
             })
             .catch(function(err) {
                 console.log('Error');
@@ -186,7 +182,7 @@ router.post('/update', function(req, res) {
             .where('id', req.user.id)
             .then(function(count) {
                 console.log('Gender updated to:' + req.body.gender);
-                req.flash('updateSuccess', 'User information updated.');
+                return req.flash('updateSuccess', 'User information updated.');
             })
             .catch(function(err) {
                 console.log('Error');
@@ -204,7 +200,7 @@ router.post('/update', function(req, res) {
             .where('id', req.user.id)
             .then(function(count) {
                 console.log('Fullname updated to:' + req.body.fullname);
-                req.flash('updateSuccess', 'User information updated.');
+                return req.flash('updateSuccess', 'User information updated.');
             })
             .catch(function(err) {
                 console.log('Error');
@@ -217,4 +213,7 @@ router.post('/update', function(req, res) {
 
 });
 
+router.closeServer = function() {
+    serve
+}
 export = router;

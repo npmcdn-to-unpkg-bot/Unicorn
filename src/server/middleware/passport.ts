@@ -28,7 +28,14 @@ var bcrypt = require('bcrypt');
      },
         function(req,username, password, done) {
             var hash = bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
-            console.log("AUTHENTICATING...");
+            
+            if (!username) {
+                done(null, false, req.flash('signupMessage', 'Please enter a username.'));
+            }
+            if (!password) {
+                done(null, false, req.flash('signupMessage', 'Pleae enter a password.'));
+            }
+
             process.nextTick(function() {
             User.query()
                 .insert({
