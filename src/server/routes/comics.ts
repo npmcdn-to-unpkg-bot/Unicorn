@@ -294,8 +294,30 @@ router.delete('/speech-bubbles/:id', function(request, response, next) {
 router.post('/:comicPanelId/replace-background-image',function(req,res,next){
 	var status_str = "BGStatusUnknown"
 	var panelId = req.params.comicPanelId;
-	// the following three 'step_x' functions are called asynchronously but in this exact order
-	function step1UpdateBackground() {
+	var targetComicId, targetPanel;
+	// the following three 'step_x' functions are called asynchronously but usually in this exact order
+	function step1UpdateTitle() {
+		ComicPanel.query().findById(panelId).eager('speechBubbles').then(function(panel:ComicPanel) {
+			targetPanel = panel;
+			targetComicId = panel.comic_id;
+			// guard against the possibility of panelTitle and/or panel.title being empty/null
+			var title = req.body.panelTitle || panel.title || '';
+			title = title.substring(0,255);
+			ComicPanel.query()
+				.patch({title: title})
+				.where('id','=',panelId)
+				.then(function (numUpdated) {
+					console.log(numUpdated, "comic panels were updated (it should actually be 1, since it is replacing a background image)");
+					status_str = (status_str==="BGAllGood") ? "BGAllGood" : "BGRetry";
+					step2UpdateBackground();
+				}).catch(function (err) {
+					console.log(err.stack);
+					status_str = (status_str==="BGAllGood") ? "BGRetry" : status_str;
+					step2UpdateBackground();
+				});
+		});
+	}
+	function step2UpdateBackground() {
 		// Image upload with some simple checking. Please see definition of var storage = multer.diskStorage.
 		// 		Here it's using domain module to catch all async errors thrown in multer processing
 		var d = require('domain').create()
@@ -315,53 +337,51 @@ router.post('/:comicPanelId/replace-background-image',function(req,res,next){
 				}
 				// update title regardless
 				status_str = "BGAllGood";
-				step2UpdateTitle();
+				step3RespondToUser();
 			});
 		})
 	}
-	function step2UpdateTitle() {
-		ComicPanel.query().findById(panelId).then(function(panel:ComicPanel) {
-			// guard against the possibility of panelTitle and/or panel.title being empty/null
-			var title = req.body.panelTitle || panel.title || '';
-			title = title.substring(0,255);
-			ComicPanel.query()
-				.patch({title: title})
-				.where('id','=',panelId)
-				.then(function (numUpdated) {
-					console.log(numUpdated, "comic panels were updated (it should actually be 1, since it is replacing a background image)");
-					status_str = (status_str==="BGAllGood") ? "BGAllGood" : "BGRetry";
-					step3RespondToUser();
-				}).catch(function (err) {
-					console.log(err.stack);
-					status_str = (status_str==="BGAllGood") ? "BGRetry" : status_str;
-					step3RespondToUser();
-				});
-		});
-	}
 	function step3RespondToUser() {
-		ComicPanel
-			.query()
-			.findById(panelId)
-			.then(function(panel:ComicPanel){
-				status_str = encodeURIComponent(status_str);
-				res.redirect('/comics/' + panel.comic_id + '/edit' + '/?status=' + status_str);
-			})
+    res.redirect('/comics/' + targetComicId + '/edit' + '/?status=' + status_str);
+    /* This is a failed try, kept for future reference (cannot handle file upload from a PUT request)
+		Comic.query()
+        .findById(targetComicId)
+        .eager('comicPanels.[speechBubbles]')
+        .then(function(targetComic){
+          sortComicPanels(targetComic);
+                //response.render('comics/edit', {comic: comic, panel: targetPanel, status: status_str});
+          res.app.render("comics/panel",{layout: false, comic: targetComic, panel: targetPanel, index: targetPanel.position},function(err, html){
+            var response = {
+              newPanelHtml: html,
+              statusString: status_str
+            };
+              console.log(html);
+              console.log(err);
+              res.send(response);
+          });
+        });
+    */
 	}
-	step1UpdateBackground();
+	step1UpdateTitle();
 });
 
 router.post('/:comicId/add-panel', function(req,res) {
 	var comicId = req.params.comicId;
 	var status_str = 'PanelStatusUnknown';
+  var targetComic, newPanel, newIndex, numPanels;
 	Comic.query()
 		.findById(comicId)
 		.eager('comicPanels')
 		.then(function(comic) {
 			// panel position starts from 0
+			targetComic = comic;
+			newIndex = comic.comicPanels.length;
 			comic
 			.$relatedQuery('comicPanels')
-			.insert({comic_id: comicId, position: comic.comicPanels.length, background_image_url: '/images/comic-panel-placeholder.png'})
-			.then(function(test) {
+			.insert({comic_id: comicId, position: newIndex, background_image_url: '/images/comic-panel-placeholder.png'})
+			.eager('speechBubbles')
+			.then(function(panel) {
+				newPanel = panel;
 				status_str = 'PanelAdded';
 				respondToUser();
 			}).catch(function(err){
@@ -376,16 +396,24 @@ router.post('/:comicId/add-panel', function(req,res) {
 		});
 	
 	function respondToUser() {
-		res.redirect('/comics/' + comicId + '/edit' + '/?status=' + status_str);
+		res.app.render("comics/panel",{layout: false, comic: targetComic, panel: newPanel, index: newIndex},function(err, html){
+			var response = {
+				newPanelHtml: html,
+				statusString: status_str
+			};
+			console.log(html);
+			console.log(err);
+			res.send(response);
+		});
 	}
-})
+});
 
 router.post('/:panelId/delete-panel', function(req,res) {
 	var panelId = req.params.panelId;
 	var status_str = 'PanelStatusUnknown';
 	var comicId = req.body.comicId;		// hidden field in the submit form
 	console.log(panelId);
-	var comicId;
+	var panels, numPanels;
 	// the following three functions are called asynchronously but in this exact order
 	function step0() {
 		// asynchronously delete all speech-bubbles on this panel
@@ -442,29 +470,54 @@ router.post('/:panelId/delete-panel', function(req,res) {
 		Comic.query().findById(comicId).then(function(comic) {
 			comic.$relatedQuery('comicPanels').orderBy('position').then(function(comicPanels) {
 				console.log('step2() starts');
+        panels = comicPanels;
+        numPanels = comicPanels.length;
 				var i;
-				for (i=0; i<comicPanels.length; i++) {
-					comicPanels[i].position = i;
+				for (i=0; i<numPanels; i++) {
+          loopSetPositionHelper(comicPanels[i],i);
+          console.log(comicPanels[i].position);
 				}
+        console.log(comicPanels);
 				// asynchronously update database
+        // This is a bit of a hack, inserting fake data first before renumbering in order to circumvent UNIQUE contraint
 				var promises = [];
+        var promises1 = [];
 				comicPanels.forEach(function(panel){
+          console.log(panel);
+          promises.push(promiseGenerator(panel,numPanels+1)); // plus 1 again to avoid position conflict with the last panel before re-numbering
+          promises1.push(promiseGenerator(panel,0));          
+        });
+        function promiseGenerator(panel,offset){
+          var pos = offset+panel.position;
+          console.log("Pos at front: "+pos);
 					var p = new Promise(function(resolve,reject){
-						ComicPanel.query().patch({position: panel.position}).where('id','=',panel.id)
+						ComicPanel.query().patch({position: pos}).where('id','=',panel.id)
 							.then(function(numberOfAffectedRows){
-								console.log("Panel id="+panel.id+" now has position "+panel.position+" NUM UPDATED = "+numberOfAffectedRows);
-								resolve("Panel id="+panel.id+" now has position "+panel.position+" NUM UPDATED = "+numberOfAffectedRows);
+								console.log("Panel id="+panel.id+" now has position "+pos+" NUM UPDATED = "+numberOfAffectedRows);
+								resolve("Panel id="+panel.id+" now has position "+pos+" NUM UPDATED = "+numberOfAffectedRows);
 							}).catch(function(err){
 								console.log(err);
 								reject({err:err});
 							});
 					});
-					promises.push(p);
-				});
+          console.log("Panel id="+panel.id+" will have position "+pos);
+          console.log("Pos at back: "+pos);
+					return p;
+				}
+        console.log("Begin fake and real numbering");
 				Promise.all(promises).then(function(results){
 					console.log(results);
-					status_str = 'PanelDeleted';
-					respondToUser();
+          // Now update with real data
+          Promise.all(promises1).then(function(results){
+            console.log(results);
+            status_str = 'PanelDeleted';
+            respondToUser();
+          }, function(reason){
+            console.log(reason);
+            status_str = 'PanelNotDeleted';
+            respondToUser();
+          });
+            
 				}, function(reason){
 					console.log(reason);
 					// status_str = 'PanelFailedRenumber';
@@ -481,8 +534,84 @@ router.post('/:panelId/delete-panel', function(req,res) {
 	function respondToUser() {
 		res.redirect('/comics/' + comicId + '/edit' + '/?status=' + status_str);
 	}
+  
+  function loopSetPositionHelper(p, i) {
+    p.position = i;
+  }
 	step0();
-})
+});
+
+router.put('/:comicId/save-panels-order', function(req, res, next) {
+  var status_str = "PanelReorderUnknown";
+  var comicId = req.params.comicId;
+  var newOrder = req.body["newOrder[]"];   // an array of old positions
+  console.log("This is our new order of panels obj");
+  console.log(newOrder);
+  var numPanels;
+  console.log(req.body);
+  var targetComic;
+  
+  Comic.query().findById(comicId).eager('comicPanels').then(function(comic){
+    targetComic = comic;
+    // asynchronously update database
+    // This is a bit of a hack, inserting fake data first before renumbering in order to circumvent UNIQUE contraint
+    numPanels = comic.comicPanels.length;
+    var promises = [];
+    var promises1 = [];
+    comic.comicPanels.forEach(function(panel){
+      console.log("numPanels: "+numPanels);
+      console.log(panel);
+      promises.push(promiseGenerator(panel,numPanels));
+      promises1.push(promiseGenerator(panel,0));
+    });
+    function promiseGenerator(panel, offset){
+      console.log(panel);
+      var pos = offset + newOrder.indexOf(String(panel.position));
+      var p = new Promise(function(resolve,reject){
+        ComicPanel.query().patch({position: pos}).where('id','=',panel.id)
+          .then(function(numberOfAffectedRows){
+            console.log("exe: Offset "+offset);
+            console.log("Panel id="+panel.id+" now has position "+pos+" NUM UPDATED = "+numberOfAffectedRows);
+            resolve("Panel id="+panel.id+" now has position "+pos+" NUM UPDATED = "+numberOfAffectedRows);
+          }).catch(function(err){
+            console.log(err);
+            reject({err:err});
+          });
+      });
+      console.log("Panel id="+panel.id+" will have position "+pos);
+      return p;
+    }
+    Promise.all(promises).then(function(results){
+      console.log(results);
+      console.log("promises good!")
+      Promise.all(promises1).then(function(results){
+        console.log("promises1 good!")
+        console.log(results);
+        status_str = 'PanelReordered';
+        respondToUser();
+      },function(reason){
+        console.log(reason);
+        status_str = 'PanelNotReordered1';
+        respondToUser();
+      });
+    }, function(reason){
+      console.log(reason);
+      status_str = 'PanelNotReordered2';
+      respondToUser();
+    });
+  }).catch(function(err){
+    console.log(err);
+    status_str="really unkown!";
+    respondToUser();
+  });
+  
+  function respondToUser() {
+    var response = {
+      statusString: status_str
+    };
+    res.send(response);
+  }
+});
 
 // helper functions
 function sortComicPanels(comic) {

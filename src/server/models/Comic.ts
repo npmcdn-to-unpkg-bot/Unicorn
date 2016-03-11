@@ -112,4 +112,11 @@ export class Comic extends BaseModel {
         return '/comics/'+this.id+'/add-panel'
     }
 	
+  	/**
+     * Returns the relative URL to save a new ordering of panels to this comic.
+     * @returns {string}
+     */
+    get savePanelsOrderUrl():string {
+        return '/comics/'+this.id+'/save-panels-order'
+    }
 }
