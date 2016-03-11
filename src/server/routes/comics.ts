@@ -203,6 +203,7 @@ router.post('/:id/request-access', function(request, response, next){
         })
         .then(function(thisOwner:User){
             owner = thisOwner;
+            console.log(owner);
 
             sendmail({
                 from: 'ubc-unicorn@peter.deltchev.com',
@@ -210,7 +211,8 @@ router.post('/:id/request-access', function(request, response, next){
                 //to: 'feld0@feld0.com',
                 subject: '[Unicorn] A user has requested access to your comic!',
                 content:
-                    'Hi '+owner.username+'!\n\n'+
+                    //'Hi '+owner.username+'!\n\n'+
+                    'Hi there!'+
                     'The user "'+request.user.username+'" has requested access to your comic, '+
                     comic.title+'. To grant them access, follow the link below and enter their username!\n\n'+
                     'http://ubc-unicorn.deltchev.com'+comic.manageCollaboratorsUrl
