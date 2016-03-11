@@ -190,16 +190,27 @@ router.get('/:id/favourite', function(request, response, next) {
 // Request edit access to a comic
 router.post('/:id/request-access', function(request, response, next){
     // get the owner of the comic
+    var comic:Comic;
+    var owner:User;
+
     Comic.query()
         .findById(request.params.id)
-        .then(function(comic){
+        .eager('users')
+        .then(function(thisComic:Comic) {
+            comic = thisComic;
+            console.log(comic);
+            return comic.owner;
+        })
+        .then(function(thisOwner:User){
+            owner = thisOwner;
+
             sendmail({
                 from: 'ubc-unicorn@peter.deltchev.com',
-                to: comic.owner.email,
+                to: owner.email,
                 //to: 'feld0@feld0.com',
                 subject: '[Unicorn] A user has requested access to your comic!',
                 content:
-                    'Hi '+comic.owner.username+'!\n\n'+
+                    'Hi '+owner.username+'!\n\n'+
                     'The user "'+request.user.username+'" has requested access to your comic, '+
                     comic.title+'. To grant them access, follow the link below and enter their username!\n\n'+
                     'http://ubc-unicorn.deltchev.com'+comic.manageCollaboratorsUrl
