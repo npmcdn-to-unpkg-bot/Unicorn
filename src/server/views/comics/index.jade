@@ -5,7 +5,7 @@ block content
 	h1= 'Comics'
 
 	form#formAddUser(name="searchcomic",method="post",action="/comics/searchcomic")
-		input#inputUserName(type="text", placeholder="comic name", name="comicname")
+		input#inputComicName(type="text", placeholder="comic name", name="comicname")
 		button#btnSubmit(type="submit") Search
 
 	each comic in comics

@@ -224,6 +224,43 @@ router.get('/:id/collaborators', function (req, res, next) {
 
 /* POST to Add Contributor service */
 router.post('/:id/collaborators', function (req, res) {
+
+
+    User
+        .query()
+        .where('username', req.body.username)
+        .then(function (user) {
+
+            return ComicUser.query()
+                .insert({
+                    user_id: user[0].id,
+                    comic_id: req.body.comicId
+                })
+        })
+
+        .then(function () {
+            Comic.query()
+                .findById(req.body.comicId)
+                .eager('users')
+                .then(function(comic){
+                    res.render('comics/edit-collaborators', {comic: comic, collaborators: comic.users, message: 'The user is now a contributor to this comic!', owner: comic.owner, status: 'Success'});
+                });
+
+        })
+        .catch(function (err) {
+
+            Comic.query()
+                .findById(req.body.comicId)
+                .eager('users')
+                .then(function(comic){
+                    res.render('comics/edit-collaborators', {comic: comic, collaborators: comic.users, message: 'Make sure the user exists and is not already a contributor to this comic.', owner: comic.owner, status: 'Fail'});
+                    console.log(comic);
+                });
+
+        });
+
+
+    /*
     User
         .query()
         .where('username', req.body.username)
@@ -242,7 +279,9 @@ router.post('/:id/collaborators', function (req, res) {
         })
         .catch(function (err) {
             console.log(err);
+            res.redirect(comicUser.comic.manageCollaboratorsUrl)
         });
+    */
 
 });
 
