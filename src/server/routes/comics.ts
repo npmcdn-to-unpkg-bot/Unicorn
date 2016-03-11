@@ -316,19 +316,19 @@ router.delete('/speech-bubbles/:id', function(request, response, next) {
 });
 
 router.post('/:comicPanelId/replace-background-image',function(req,res,next){
-	var status_str = "BGStatusUnknown"
+	var status_str = "BGStatusUnknown";
 	var panelId = req.params.comicPanelId;
 	// the following three 'step_x' functions are called asynchronously but in this exact order
 	function step1UpdateBackground() {
 		// Image upload with some simple checking. Please see definition of var storage = multer.diskStorage.
 		// 		Here it's using domain module to catch all async errors thrown in multer processing
-		var d = require('domain').create()
+		var d = require('domain').create();
 		d.on('error', function(err){
 			// custom not-an-image error is thrown in multer processing
 			console.log(err);
 			status_str = "BGRemind";
 			step3RespondToUser();
-		})
+		});
 		d.run(function() {
 			// starts multer processing
 			upload(req,res,function(err) {
@@ -402,7 +402,7 @@ router.post('/:comicId/add-panel', function(req,res) {
 	function respondToUser() {
 		res.redirect('/comics/' + comicId + '/edit' + '/?status=' + status_str);
 	}
-})
+});
 
 router.post('/:panelId/delete-panel', function(req,res) {
 	var panelId = req.params.panelId;
@@ -506,7 +506,7 @@ router.post('/:panelId/delete-panel', function(req,res) {
 		res.redirect('/comics/' + comicId + '/edit' + '/?status=' + status_str);
 	}
 	step0();
-})
+});
 
 // helper functions
 function sortComicPanels(comic) {
