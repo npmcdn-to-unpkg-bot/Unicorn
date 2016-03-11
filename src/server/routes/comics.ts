@@ -185,7 +185,7 @@ router.get('/:id/favourite', function(request, response, next) {
             response.redirect('/comics/' + request.params.id);
         });
 
-})
+});
 
 router.get('/:id/edit', function(request, response, next) {
 	// this is the query string
@@ -209,6 +209,12 @@ router.get('/:id/collaborators', function (req, res, next) {
         .eager('users')
         .then(function(returnedComic){
             comic = returnedComic;
+
+            comic.users.map(function(user:User) {
+                user.deleteCollaboratorUrl = '/comics/'+comic.id+'/collaborators/'+user.id;
+                return user;
+            });
+
             return comic.owner;
         })
         .then(function(comicOwner){
@@ -224,43 +230,6 @@ router.get('/:id/collaborators', function (req, res, next) {
 
 /* POST to Add Contributor service */
 router.post('/:id/collaborators', function (req, res) {
-
-
-    User
-        .query()
-        .where('username', req.body.username)
-        .then(function (user) {
-
-            return ComicUser.query()
-                .insert({
-                    user_id: user[0].id,
-                    comic_id: req.body.comicId
-                })
-        })
-
-        .then(function () {
-            Comic.query()
-                .findById(req.body.comicId)
-                .eager('users')
-                .then(function(comic){
-                    res.render('comics/edit-collaborators', {comic: comic, collaborators: comic.users, message: 'The user is now a contributor to this comic!', owner: comic.owner, status: 'Success'});
-                });
-
-        })
-        .catch(function (err) {
-
-            Comic.query()
-                .findById(req.body.comicId)
-                .eager('users')
-                .then(function(comic){
-                    res.render('comics/edit-collaborators', {comic: comic, collaborators: comic.users, message: 'Make sure the user exists and is not already a contributor to this comic.', owner: comic.owner, status: 'Fail'});
-                    console.log(comic);
-                });
-
-        });
-
-
-    /*
     User
         .query()
         .where('username', req.body.username)
@@ -269,21 +238,37 @@ router.post('/:id/collaborators', function (req, res) {
             return ComicUser.query()
                 .insert({
                     user_id: user.id,
-                    comic_id: req.body.comicId
+                    comic_id: req.params.id
                 })
         })
 
+        .then(function(comicUser:ComicUser){
+            return comicUser.$loadRelated('comics');
+        })
+
         .then(function (comicUser:ComicUser) {
-            console.log(comicUser.comic);
-            return res.redirect(comicUser.comic.manageCollaboratorsUrl);
+            console.log(comicUser.comics);
+            return res.redirect(comicUser.comics.manageCollaboratorsUrl);
         })
         .catch(function (err) {
             console.log(err);
-            res.redirect(comicUser.comic.manageCollaboratorsUrl)
         });
-    */
 
 });
+
+
+router.delete('/:comicId/collaborators/:userId', function (req, res) {
+    ComicUser.
+        query()
+        .where('comic_id', req.params.comicId)
+        .where('user_id', req.params.userId)
+        .delete()
+        .then(function(){
+            return res.redirect('/comics/'+req.params.comicId+'/collaborators');
+        })
+});
+
+
 
 router.post('/:comicId/panels/:panelId/speech-bubbles', function(request, response, next) {
     ComicPanel.query()

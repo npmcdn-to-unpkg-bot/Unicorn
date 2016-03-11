@@ -41,5 +41,21 @@ $(document).ready(function(){
             var newText = prompt('Enter the caption for this speech bubble', $speechBubble.text());
             $speechBubble.children('.-text').text(newText);
             updateSpeechBubble($speechBubble);
-        })
+        });
+
+
+    // Remove collaborators
+    $('.delete-collaborator')
+        .on('click', function(event) {
+            event.preventDefault();
+            var $trashButton = $(this);
+
+            $.ajax({
+                url: $trashButton.data('delete-url'),
+                method: 'DELETE',
+                success: function() {
+                    $trashButton.parent().remove();
+                }
+            })
+        });
 });
