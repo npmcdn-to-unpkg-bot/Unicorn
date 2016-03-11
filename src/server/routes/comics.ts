@@ -256,7 +256,7 @@ router.post('/:id/collaborators', function (req, res) {
 
 });
 
-
+/* DELETE a contributor from a comic */
 router.delete('/:comicId/collaborators/:userId', function (req, res) {
     ComicUser.
         query()
@@ -264,7 +264,7 @@ router.delete('/:comicId/collaborators/:userId', function (req, res) {
         .where('user_id', req.params.userId)
         .delete()
         .then(function(){
-            return res.redirect('/comics/'+req.params.comicId+'/collaborators');
+            return res.redirect(303, '/comics/'+req.params.comicId+'/collaborators');
         })
 });
 

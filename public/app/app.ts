@@ -49,7 +49,7 @@ $(document).ready(function(){
         .on('click', function(event) {
             event.preventDefault();
             var $trashButton = $(this);
-
+            
             $.ajax({
                 url: $trashButton.data('delete-url'),
                 method: 'DELETE',
