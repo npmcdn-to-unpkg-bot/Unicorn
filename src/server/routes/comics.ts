@@ -11,7 +11,7 @@ import {SavedComic} from '../models/SavedComic';
 
 // handling user background image uploads
 var multer = require('multer');
-var bcrypt = require('bcryptjs');
+var sendmail = require('sendmail')();
 
 
 var storage = multer.diskStorage({
@@ -185,6 +185,30 @@ router.get('/:id/favourite', function(request, response, next) {
             response.redirect('/comics/' + request.params.id);
         });
 
+});
+
+// Request edit access to a comic
+router.post('/:id/request-access', function(request, response, next){
+    // get the owner of the comic
+    Comic.query()
+        .findById(request.params.id)
+        .then(function(comic){
+            sendmail({
+                from: 'ubc-unicorn@peter.deltchev.com',
+                to: comic.owner.email,
+                //to: 'feld0@feld0.com',
+                subject: '[Unicorn] A user has requested access to your comic!',
+                content:
+                    'Hi '+comic.owner.username+'!\n\n'+
+                    'The user "'+request.user.username+'" has requested access to your comic, '+
+                    comic.title+'. To grant them access, follow the link below and enter their username!\n\n'+
+                    'http://ubc-unicorn.deltchev.com'+comic.manageCollaboratorsUrl
+            }, function(err, reply){
+                console.log(err);
+                console.log(reply);
+                response.redirect(303, comic.url);
+            });
+        });
 });
 
 router.get('/:id/edit', function(request, response, next) {

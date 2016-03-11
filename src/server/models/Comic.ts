@@ -77,7 +77,7 @@ export class Comic extends BaseModel {
      * @returns {string}
      */
     get url():string {
-        return '/comics/'+this.id
+        return '/comics/'+this.id;
     }
 
     /**
@@ -85,7 +85,7 @@ export class Comic extends BaseModel {
      * @returns {string}
      */
     get editUrl():string {
-        return '/comics/'+this.id+'/edit'
+        return '/comics/'+this.id+'/edit';
     }
 
     /**
@@ -93,7 +93,7 @@ export class Comic extends BaseModel {
      * @returns {string}
      */
     get manageCollaboratorsUrl():string {
-        return '/comics/'+this.id+'/collaborators'
+        return '/comics/'+this.id+'/collaborators';
     }
 
     /**
@@ -101,7 +101,7 @@ export class Comic extends BaseModel {
      * @returns {string}
      */
     get favouriteUrl(): string {
-        return '/comics/' + this.id + '/favourite'
+        return '/comics/' + this.id + '/favourite';
     }
 
 	/**
@@ -109,7 +109,10 @@ export class Comic extends BaseModel {
      * @returns {string}
      */
     get addPanelUrl():string {
-        return '/comics/'+this.id+'/add-panel'
+        return '/comics/'+this.id+'/add-panel';
     }
-	
+
+    get requestAccessUrl():string {
+        return '/comics/'+this.id+'/request-access';
+    }
 }

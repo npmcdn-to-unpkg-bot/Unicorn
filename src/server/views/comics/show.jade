@@ -8,11 +8,13 @@ block content
   -if(flash.favouriteSuccess)
     .alert.alert-success #{flash.favouriteSuccess}
 
-  if isContributor==true
+  if isContributor
     p
       a(href=comic.editUrl, class='btn btn-info') Edit this comic!
-  else
-    p Contact one of the contributors for an invite to edit this comic!
+  else if isLoggedIn
+    p You're not an editor on this comic.
+      form(action=comic.requestAccessUrl, method='POST')
+        button#btnSubmit(type="submit" class='btn btn-info') Request access!
 
   ul(class='comic')
     each panel in comic.comicPanels
@@ -22,7 +24,7 @@ block content
             span(class='-text')=bubble.text
         img(src=panel.backgroundImageUrl)
 
-  if isLoggedIn==true
+  if isLoggedIn
     p
       a(href=comic.favouriteUrl, class='btn btn-info') Favourite this comic!
 
