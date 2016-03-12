@@ -16,7 +16,7 @@ exports.down = function(knex, Promise) {
   	  	.raw('ALTER TABLE users DROP COLUMN gender')
   		
   		.table('users', function (table) {
-            table.dropColumns('gender');
+            table.smallint('gender');
         })
   	]);
 };

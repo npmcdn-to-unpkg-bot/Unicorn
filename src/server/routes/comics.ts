@@ -190,16 +190,29 @@ router.get('/:id/favourite', function(request, response, next) {
 // Request edit access to a comic
 router.post('/:id/request-access', function(request, response, next){
     // get the owner of the comic
+    var comic:Comic;
+    var owner:User;
+
     Comic.query()
         .findById(request.params.id)
-        .then(function(comic){
+        .eager('users')
+        .then(function(thisComic:Comic) {
+            comic = thisComic;
+            console.log(comic);
+            return comic.owner;
+        })
+        .then(function(thisOwner:User){
+            owner = thisOwner;
+            console.log(owner);
+
             sendmail({
                 from: 'ubc-unicorn@peter.deltchev.com',
-                to: comic.owner.email,
+                to: owner.email,
                 //to: 'feld0@feld0.com',
                 subject: '[Unicorn] A user has requested access to your comic!',
                 content:
-                    'Hi '+comic.owner.username+'!\n\n'+
+                    //'Hi '+owner.username+'!\n\n'+
+                    'Hi there!'+
                     'The user "'+request.user.username+'" has requested access to your comic, '+
                     comic.title+'. To grant them access, follow the link below and enter their username!\n\n'+
                     'http://ubc-unicorn.deltchev.com'+comic.manageCollaboratorsUrl
@@ -355,7 +368,6 @@ router.post('/:comicPanelId/replace-background-image',function(req,res,next){
 				.patch({title: title})
 				.where('id','=',panelId)
 				.then(function (numUpdated) {
-					console.log(numUpdated, "comic panels were updated (it should actually be 1, since it is replacing a background image)");
 					status_str = (status_str==="BGAllGood") ? "BGAllGood" : "BGRetry";
 					step2UpdateBackground();
 				}).catch(function (err) {
@@ -403,7 +415,6 @@ router.post('/:comicPanelId/replace-background-image',function(req,res,next){
               newPanelHtml: html,
               statusString: status_str
             };
-              console.log(html);
               console.log(err);
               res.send(response);
           });
@@ -449,7 +460,6 @@ router.post('/:comicId/add-panel', function(req,res) {
 				newPanelHtml: html,
 				statusString: status_str
 			};
-			console.log(html);
 			console.log(err);
 			res.send(response);
 		});
@@ -460,7 +470,6 @@ router.post('/:panelId/delete-panel', function(req,res) {
 	var panelId = req.params.panelId;
 	var status_str = 'PanelStatusUnknown';
 	var comicId = req.body.comicId;		// hidden field in the submit form
-	console.log(panelId);
 	var panels, numPanels;
 	// the following three functions are called asynchronously but in this exact order
 	function step0() {
@@ -470,12 +479,10 @@ router.post('/:panelId/delete-panel', function(req,res) {
 				var promises = [];
 				// created promises to delete each speech bubble
 				speechBubbles.forEach(function(element){
-					console.log(speechBubbles);
 					var p = new Promise(function (resolve, reject) {
 						SpeechBubble.query()
 							.deleteById(element.id)
 							.then(function(speechBubble:SpeechBubble) {
-								console.log('Speech Bubble (id '+ element.id + ') deleted');
 								resolve('Speech Bubble (id '+ element.id + ') deleted');
 							}).catch(function(err){
 								reject(err);
@@ -504,8 +511,6 @@ router.post('/:panelId/delete-panel', function(req,res) {
 	function step1() {
 		// asynchronously delete a panel with NO speech-bubbles
 		ComicPanel.query().deleteById(panelId).then(function(numDeleted){
-			console.log("There are "+numDeleted+" panels deleted. Expected: 1");
-			console.log('step1() ends');
 			step2();
 		}).catch(function(err){
 			console.log(err);
@@ -517,45 +522,39 @@ router.post('/:panelId/delete-panel', function(req,res) {
 		// asynchronously re-number the positions of panels
 		Comic.query().findById(comicId).then(function(comic) {
 			comic.$relatedQuery('comicPanels').orderBy('position').then(function(comicPanels) {
-				console.log('step2() starts');
         panels = comicPanels;
         numPanels = comicPanels.length;
 				var i;
 				for (i=0; i<numPanels; i++) {
           loopSetPositionHelper(comicPanels[i],i);
-          console.log(comicPanels[i].position);
 				}
-        console.log(comicPanels);
 				// asynchronously update database
         // This is a bit of a hack, inserting fake data first before renumbering in order to circumvent UNIQUE contraint
 				var promises = [];
-        var promises1 = [];
 				comicPanels.forEach(function(panel){
-          console.log(panel);
           promises.push(promiseGenerator(panel,numPanels+1)); // plus 1 again to avoid position conflict with the last panel before re-numbering
-          promises1.push(promiseGenerator(panel,0));          
         });
         function promiseGenerator(panel,offset){
           var pos = offset+panel.position;
-          console.log("Pos at front: "+pos);
 					var p = new Promise(function(resolve,reject){
 						ComicPanel.query().patch({position: pos}).where('id','=',panel.id)
 							.then(function(numberOfAffectedRows){
-								console.log("Panel id="+panel.id+" now has position "+pos+" NUM UPDATED = "+numberOfAffectedRows);
 								resolve("Panel id="+panel.id+" now has position "+pos+" NUM UPDATED = "+numberOfAffectedRows);
 							}).catch(function(err){
 								console.log(err);
 								reject({err:err});
 							});
 					});
-          console.log("Panel id="+panel.id+" will have position "+pos);
-          console.log("Pos at back: "+pos);
 					return p;
 				}
-        console.log("Begin fake and real numbering");
+        console.log("Begin numbering");
 				Promise.all(promises).then(function(results){
 					console.log(results);
           // Now update with real data
+          var promises1 = [];
+          panels.forEach(function(panel){
+            promises1.push(promiseGenerator(panel,0));
+          });
           Promise.all(promises1).then(function(results){
             console.log(results);
             status_str = 'PanelDeleted';
@@ -593,9 +592,8 @@ router.put('/:comicId/save-panels-order', function(req, res, next) {
   var status_str = "PanelReorderUnknown";
   var comicId = req.params.comicId;
   var newOrder = req.body["newOrder[]"];   // an array of old positions
-  console.log("This is our new order of panels obj");
-  console.log(newOrder);
   var numPanels;
+  console.log(newOrder);
   console.log(req.body);
   var targetComic;
   
@@ -605,35 +603,29 @@ router.put('/:comicId/save-panels-order', function(req, res, next) {
     // This is a bit of a hack, inserting fake data first before renumbering in order to circumvent UNIQUE contraint
     numPanels = comic.comicPanels.length;
     var promises = [];
-    var promises1 = [];
     comic.comicPanels.forEach(function(panel){
-      console.log("numPanels: "+numPanels);
-      console.log(panel);
       promises.push(promiseGenerator(panel,numPanels));
-      promises1.push(promiseGenerator(panel,0));
     });
     function promiseGenerator(panel, offset){
-      console.log(panel);
       var pos = offset + newOrder.indexOf(String(panel.position));
       var p = new Promise(function(resolve,reject){
         ComicPanel.query().patch({position: pos}).where('id','=',panel.id)
           .then(function(numberOfAffectedRows){
-            console.log("exe: Offset "+offset);
-            console.log("Panel id="+panel.id+" now has position "+pos+" NUM UPDATED = "+numberOfAffectedRows);
             resolve("Panel id="+panel.id+" now has position "+pos+" NUM UPDATED = "+numberOfAffectedRows);
           }).catch(function(err){
             console.log(err);
             reject({err:err});
           });
       });
-      console.log("Panel id="+panel.id+" will have position "+pos);
       return p;
     }
     Promise.all(promises).then(function(results){
       console.log(results);
-      console.log("promises good!")
+      var promises1 = [];
+      targetComic.comicPanels.forEach(function(panel){
+        promises1.push(promiseGenerator(panel,0));
+      });
       Promise.all(promises1).then(function(results){
-        console.log("promises1 good!")
         console.log(results);
         status_str = 'PanelReordered';
         respondToUser();

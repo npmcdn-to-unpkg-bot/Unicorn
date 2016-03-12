@@ -42,7 +42,8 @@ $(document).ready(function(){
             $speechBubble.children('.-text').text(newText);
             updateSpeechBubble($speechBubble);
 
-        })
+
+        });
 		
 	// POST request to add panel: this is probably an overkill
   // problem: if requests sent too frequently, server gets comic panel position conflict at insertion
@@ -87,9 +88,8 @@ $(document).ready(function(){
 			success: function( json ) {
 				// json = {statusString: XXX}
         statusString = json.statusString;
-				alert( json.statusString );
         if (json.statusString==="PanelReordered") {
-          window.location.href = updateQueryStringParameter(window.location.pathname, status, statusString);
+          window.location.href = updateQueryStringParameter(window.location.pathname, "status", statusString);
         } else {
           updateInfoBoxes(statusString);
         }
@@ -103,7 +103,7 @@ $(document).ready(function(){
 			
 			// Code to run regardless of success or failure
 			complete: function( xhr, status ) {
-				alert( "The request is complete!" );
+				// alert( "The request is complete!" );
 			}
 		});	
 	}
@@ -176,11 +176,19 @@ $(document).ready(function(){
     $("#panel-reorder").attr("id","panel-save-order");
     $("#panel-save-order").text("Save order changes!");
     $("#panel-save-order").click(savePanelsOrder);
+    $("#panels-list").on("mouseenter","li.-comicPanel", function(){
+      $(this).css("box-shadow", "10px 10px 5px grey");
+    });
+    $("#panels-list").on("mouseleave","li.-comicPanel", function(){
+      $(this).css("box-shadow", "none");
+    });
+    /*
     $("#panels-list > *").hover(function() {
       $(this).css("box-shadow", "10px 10px 5px grey");
     }, function() {
       $(this).css("box-shadow", "none");
     });
+    */
   }
   
   updateInfoBoxes( getUrlVars()["status"] );
@@ -217,7 +225,9 @@ $(document).ready(function(){
                 }
             })
         });
-        
+  
+  // adds or updates query string parameter
+  // source http://stackoverflow.com/questions/5999118/add-or-update-query-string-parameter
   function updateQueryStringParameter(uri, key, value) {
     var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
     var separator = uri.indexOf('?') !== -1 ? "&" : "?";
