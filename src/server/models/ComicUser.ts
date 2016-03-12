@@ -35,7 +35,7 @@ export class ComicUser extends BaseModel {
                 modelClass: Comic,
                 join: {
                     from: 'comic_user.comic_id',
-                    to: 'comics.comic_id',
+                    to: 'comics.id',
                 }
             },
             users: {

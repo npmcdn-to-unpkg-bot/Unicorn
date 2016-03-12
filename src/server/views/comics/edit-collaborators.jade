@@ -3,20 +3,19 @@ extends ../layout
 block content
   h1 Managing collaborators for: #{comic.title}
 
+  case status
+    when "Success"
+      div.alert.alert-success(role="alert")
+        strong #{message}
+    when "Fail"
+      div.alert.alert-danger(role="alert")
+        strong #{message}
+
   p
     a(href=comic.editUrl, class='btn btn-info') Return to editing this comic
 
-  style.
-    messageText {
-      font-size: 20px;
-      color: #{messageColour}
-    }
-
-  messageText #{message}
-
   h2 Add a new collaborator!
   form#formAddUser(name="addContributorToComic", method="post", action=comic.manageCollaboratorsUrl)
-    input#inputUserName(type="hidden", name="comicId", value=comic.id)
     input#inputUserName(type="text", placeholder="username", name="username")
     button#btnSubmit(type="submit") submit
 
@@ -25,4 +24,5 @@ block content
     each user in collaborators
       li=user.username
         if user.id != owner.id
-          span DELETE THIS
+          button(type="button" data-delete-url=user.deleteCollaboratorUrl class="delete-collaborator btn btn-xs btn-danger")
+            span(class="glyphicon glyphicon-trash")

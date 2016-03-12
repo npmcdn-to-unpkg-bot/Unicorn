@@ -11,7 +11,7 @@ import {SavedComic} from '../models/SavedComic';
 
 // handling user background image uploads
 var multer = require('multer');
-var bcrypt = require('bcryptjs');
+var sendmail = require('sendmail')();
 
 
 var storage = multer.diskStorage({
@@ -185,7 +185,31 @@ router.get('/:id/favourite', function(request, response, next) {
             response.redirect('/comics/' + request.params.id);
         });
 
-})
+});
+
+// Request edit access to a comic
+router.post('/:id/request-access', function(request, response, next){
+    // get the owner of the comic
+    Comic.query()
+        .findById(request.params.id)
+        .then(function(comic){
+            sendmail({
+                from: 'ubc-unicorn@peter.deltchev.com',
+                to: comic.owner.email,
+                //to: 'feld0@feld0.com',
+                subject: '[Unicorn] A user has requested access to your comic!',
+                content:
+                    'Hi '+comic.owner.username+'!\n\n'+
+                    'The user "'+request.user.username+'" has requested access to your comic, '+
+                    comic.title+'. To grant them access, follow the link below and enter their username!\n\n'+
+                    'http://ubc-unicorn.deltchev.com'+comic.manageCollaboratorsUrl
+            }, function(err, reply){
+                console.log(err);
+                console.log(reply);
+                response.redirect(303, comic.url);
+            });
+        });
+});
 
 router.get('/:id/edit', function(request, response, next) {
 	// this is the query string
@@ -209,6 +233,12 @@ router.get('/:id/collaborators', function (req, res, next) {
         .eager('users')
         .then(function(returnedComic){
             comic = returnedComic;
+
+            comic.users.map(function(user:User) {
+                user.deleteCollaboratorUrl = '/comics/'+comic.id+'/collaborators/'+user.id;
+                return user;
+            });
+
             return comic.owner;
         })
         .then(function(comicOwner){
@@ -232,19 +262,37 @@ router.post('/:id/collaborators', function (req, res) {
             return ComicUser.query()
                 .insert({
                     user_id: user.id,
-                    comic_id: req.body.comicId
+                    comic_id: req.params.id
                 })
         })
 
+        .then(function(comicUser:ComicUser){
+            return comicUser.$loadRelated('comics');
+        })
+
         .then(function (comicUser:ComicUser) {
-            console.log(comicUser.comic);
-            return res.redirect(comicUser.comic.manageCollaboratorsUrl);
+            console.log(comicUser.comics);
+            return res.redirect(comicUser.comics.manageCollaboratorsUrl);
         })
         .catch(function (err) {
             console.log(err);
         });
 
 });
+
+/* DELETE a contributor from a comic */
+router.delete('/:comicId/collaborators/:userId', function (req, res) {
+    ComicUser.
+        query()
+        .where('comic_id', req.params.comicId)
+        .where('user_id', req.params.userId)
+        .delete()
+        .then(function(){
+            return res.redirect(303, '/comics/'+req.params.comicId+'/collaborators');
+        })
+});
+
+
 
 router.post('/:comicId/panels/:panelId/speech-bubbles', function(request, response, next) {
     ComicPanel.query()
@@ -292,7 +340,7 @@ router.delete('/speech-bubbles/:id', function(request, response, next) {
 });
 
 router.post('/:comicPanelId/replace-background-image',function(req,res,next){
-	var status_str = "BGStatusUnknown"
+	var status_str = "BGStatusUnknown";
 	var panelId = req.params.comicPanelId;
 	var targetComicId, targetPanel;
 	// the following three 'step_x' functions are called asynchronously but usually in this exact order
@@ -320,13 +368,13 @@ router.post('/:comicPanelId/replace-background-image',function(req,res,next){
 	function step2UpdateBackground() {
 		// Image upload with some simple checking. Please see definition of var storage = multer.diskStorage.
 		// 		Here it's using domain module to catch all async errors thrown in multer processing
-		var d = require('domain').create()
+		var d = require('domain').create();
 		d.on('error', function(err){
 			// custom not-an-image error is thrown in multer processing
 			console.log(err);
 			status_str = "BGRemind";
 			step3RespondToUser();
-		})
+		});
 		d.run(function() {
 			// starts multer processing
 			upload(req,res,function(err) {

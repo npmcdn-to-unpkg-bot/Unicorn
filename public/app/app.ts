@@ -41,6 +41,7 @@ $(document).ready(function(){
             var newText = prompt('Enter the caption for this speech bubble', $speechBubble.text());
             $speechBubble.children('.-text').text(newText);
             updateSpeechBubble($speechBubble);
+
         })
 		
 	// POST request to add panel: this is probably an overkill
@@ -76,6 +77,7 @@ $(document).ready(function(){
   // PUT request to save panels' order
 	function savePanelsOrder() {
     var newOrder = $("#panels-list").sortable('toArray', {attribute: 'data-original-index'});
+    var statusString;
     console.log(newOrder);
 		$.ajax({
 			url: $("#panel-save-order").attr("data-save-order-url"),
@@ -87,7 +89,7 @@ $(document).ready(function(){
         statusString = json.statusString;
 				alert( json.statusString );
         if (json.statusString==="PanelReordered") {
-          window.location.href = window.location.pathname + "./?status=" + statusString;
+          window.location.href = updateQueryStringParameter(window.location.pathname, status, statusString);
         } else {
           updateInfoBoxes(statusString);
         }
@@ -199,4 +201,31 @@ $(document).ready(function(){
 		$("div[id|='collapsible-panel']").collapse('hide');
 	});
   
+
+
+    // Remove collaborators
+    $('.delete-collaborator')
+        .on('click', function(event) {
+            event.preventDefault();
+            var $trashButton = $(this);
+
+            $.ajax({
+                url: $trashButton.data('delete-url'),
+                method: 'DELETE',
+                success: function() {
+                    $trashButton.parent().remove();
+                }
+            })
+        });
+        
+  function updateQueryStringParameter(uri, key, value) {
+    var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+    var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+    if (uri.match(re)) {
+      return uri.replace(re, '$1' + key + "=" + value + '$2');
+    }
+    else {
+      return uri + separator + key + "=" + value;
+    }
+  }
 });
