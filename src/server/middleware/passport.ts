@@ -28,30 +28,24 @@ var bcrypt = require('bcrypt');
      },
         function(req,username, password, done) {
             var hash = bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
-            
-            if (!username) {
-                done(null, false, req.flash('signupMessage', 'Please enter a username.'));
-            }
-            if (!password) {
-                done(null, false, req.flash('signupMessage', 'Pleae enter a password.'));
-            }
 
             process.nextTick(function() {
-            User.query()
-                .insert({
-                    'username': username,
-                    'password': hash
-                })
-                .then(function(user) {
-                    console.log('User added');
-                    console.log(user);
-                    done(null, user);
-                })
-                .catch(function(err) {
-                    console.log('Username exists already');
-                    done(null, false, req.flash('signupMessage', 'That username is already taken. Please choose another one.'));
-                });
-             })
+                User.query()
+                    .insert({
+                        'username': username,
+                        'email': req.body.useremail,
+                        'password': hash
+                    })
+                    .then(function(user) {
+                        console.log('User added');
+                        console.log(user);
+                        done(null, user);
+                    })
+                    .catch(function(err) {
+                        console.log(err);
+                        done(null, false, req.flash('signupMessage', 'That username is already taken. Please choose another one.'));
+                    });
+            });
         }));
 
     passport.use('local-login', new LocalStrategy({

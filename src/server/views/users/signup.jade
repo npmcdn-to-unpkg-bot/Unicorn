@@ -5,7 +5,7 @@ block content
     -if(flash.signupMessage)
       .alert.alert-danger #{flash.signupMessage}
     form#formAddUser(name="adduser",method="post",action="/users/adduser")
-        input#inputUserName(type="text", placeholder="user name", name="username")
-        input#inputUserEmail(type="text", placeholder="email (optional)", name="useremail")
-        input#inputUserPassword(type="password", placeholder="password", name="userpassword")
+        input#inputUserName(type="text", placeholder="user name", name="username", required='')
+        input#inputUserEmail(type="text", placeholder="email", name="useremail", required='')
+        input#inputUserPassword(type="password", placeholder="password", name="userpassword", required='')
         button#btnSubmit(type="submit") submit
