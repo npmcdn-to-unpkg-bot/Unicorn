@@ -8,6 +8,7 @@ import {ComicUser} from '../models/ComicUser';
 import {ComicPanel} from '../models/ComicPanel';
 import {SpeechBubble} from "../models/SpeechBubble";
 import {SavedComic} from '../models/SavedComic';
+import * as authorize from '../middleware/authorization';
 
 // handling user background image uploads
 var multer = require('multer');
@@ -96,11 +97,11 @@ router.post('/searchcomic', function(request, response, next) {
 
 });
 
-router.get('/new', function(request, response, next) {
+router.get('/new', authorize, function(request, response, next) {
     response.render('comics/new');
 });
 
-router.get('/:id', function(request, response, next) {    
+router.get('/:id', function(request, response, next) {
     // if statements doesn't seems to execute in query, have some duplicated code for now
     if (request.user == null) {
     
