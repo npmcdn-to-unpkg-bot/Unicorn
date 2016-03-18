@@ -64,8 +64,10 @@ export class Comic extends BaseModel {
     get owner():User {
         return User
             .query()
-            .whereExists(
+            .whereIn(
+                'id',
                 ComicUser.query()
+                    .select('user_id')
                     .where('comic_id', this.id)
                     .where('is_owner', true)
             )
