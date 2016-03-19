@@ -5,8 +5,12 @@ block content
 
   -if(flash.alreadySaved)
     .alert.alert-info #{flash.alreadySaved}
+  -if(flash.alreadyUnfavourited)
+    .alert.alert-info #{flash.alreadyUnfavourited}
   -if(flash.favouriteSuccess)
     .alert.alert-success #{flash.favouriteSuccess}
+  -if(flash.unfavouriteSuccess)
+    .alert.alert-success #{flash.unfavouriteSuccess}
 
   if isContributor
     p
@@ -27,9 +31,9 @@ block content
   if isLoggedIn
     p
       a(href=comic.favouriteUrl, class='btn btn-info') Favourite this comic!
+      a(href=comic.unfavouriteUrl, class='btn btn-info') Unfavourite this comic!
 
   h2= 'Contributors to this comic'
   ul
     each user in users
       li=user.username
->>>>>>> 9682c0fcaf19d7b1fe0f76cabdab7a4b72ebbec4

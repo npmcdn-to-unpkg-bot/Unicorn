@@ -188,6 +188,28 @@ router.get('/:id/favourite', function(request, response, next) {
 
 });
 
+router.get('/:id/unfavourite', function(request, response, next) {
+    SavedComic.query()
+        .where({
+            'user_id': request.user.id,
+            'comic_id': request.params.id
+        })
+        .del()
+        .then(function(delCount) {
+            console.log(delCount);
+            if (delCount === 0) {
+                request.flash('alreadyUnfavourited', 'Comic is already unfavourited.');
+                response.redirect('/comics/' + request.params.id);
+            } else {
+                request.flash('unfavouriteSuccess', 'Comic has been unfavourited.');
+                response.redirect('/comics/' + request.params.id);
+            }
+        })
+        .catch(function(err) {
+            console.log(err);
+        })
+});
+
 // Request edit access to a comic
 router.post('/:id/request-access', function(request, response, next){
     // get the owner of the comic

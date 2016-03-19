@@ -3,6 +3,7 @@ const router = express.Router();
 
 var passport = require ('../middleware/passport');
 import {User} from '../models/User';
+import {Comic} from '../models/Comic';
 
 var bcrypt = require('bcryptjs');
 
@@ -64,17 +65,23 @@ router.get('/profile', function(req, res) {
     User.query()
         .where('id', '=', req.user.id)
         .then(function(user) {
-            console.log(user);
-
-            return user[0].$relatedQuery('savedComics')
+            return user[0].$relatedQuery('comicsFromSavedComics')
                 .where('user_id', '=', req.user.id)
-                .select('comic_id')
+                .select('*')
         })
-        .then(function(savedComicIds) {
-            res.render('users/profile', { 
-                savedComics: savedComicIds,
-                user: req.user 
-            });
+        .then(function(savedComics) {
+            console.log(savedComics);
+            if (!savedComics[0]) {
+                res.render('users/profile', {
+                    savedComics: [],
+                    user: req.user
+                })
+            } else {
+                res.render('users/profile', {
+                    savedComics: savedComics,
+                    user: req.user
+                });
+            }
         })
         .catch(function(err) {
             console.log('Error');
@@ -213,7 +220,4 @@ router.post('/update', function(req, res) {
 
 });
 
-router.closeServer = function() {
-    serve
-}
 export = router;

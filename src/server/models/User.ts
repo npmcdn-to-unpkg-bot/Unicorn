@@ -57,8 +57,20 @@ export class User extends BaseModel {
                     from: 'users.id',
                     to: 'saved_comics.user_id'
                 }
-            }
-            
+            },
+            comicsFromSavedComics: {
+                relation: ManyToManyRelation,
+                modelClass: Comic,
+                join: {
+                    from: 'users.id',
+                    to: 'comics.id',
+                    through: {
+                        modelClass: SavedComic,
+                        from: 'saved_comics.user_id',
+                        to: 'saved_comics.comic_id'
+                    }
+                }
+            }            
         }
     }
 }

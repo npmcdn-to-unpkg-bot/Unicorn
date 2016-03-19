@@ -4,6 +4,7 @@ import {OneToManyRelation, ManyToManyRelation} from 'objection';
 import {User} from './User';
 import {ComicUser} from './ComicUser';
 import {ComicPanel} from './ComicPanel';
+import {SavedComic} from './SavedComic';
 import {BaseModel} from './BaseModel';
 
 export class Comic extends BaseModel {
@@ -104,6 +105,14 @@ export class Comic extends BaseModel {
      */
     get favouriteUrl(): string {
         return '/comics/' + this.id + '/favourite';
+    }
+
+    /**
+     * Returns the relative URL to unfavourite this comic.
+     * @returns {string}
+     */
+    get unfavouriteUrl(): string {
+        return '/comics/' + this.id + '/unfavourite';
     }
 
 	/**
