@@ -137,8 +137,6 @@ $(document).ready(function(){
 			}
 		});	
 	}
-	
-  $("#search-btn").on("click",searchComics);
   
   function updateInfoBoxes(statusString) {
     var sentences = {
@@ -207,19 +205,6 @@ $(document).ready(function(){
     });
     */
   }  
-	
-  updateInfoBoxes( getUrlVars()["status"] );
-  $("#add-panel-btn").click(addPanel);
-  $("#panel-reorder").click(startReordering);
-	$("div[id|='collapsible-panel']").collapse('show');
-	$("#panel-show-all").click(function(){
-		$("div[id|='collapsible-panel']").collapse('show');
-	});
-	$("#panel-collapse-all").click(function(){
-		$("div[id|='collapsible-panel']").collapse('hide');
-	});
-  
-
 
     // Remove collaborators
     $('.delete-collaborator')
@@ -235,6 +220,67 @@ $(document).ready(function(){
                 }
             })
         });
+        
+  // adds or updates query string parameter
+  // source http://stackoverflow.com/questions/5999118/add-or-update-query-string-parameter
+  function updateQueryStringParameter(uri, key, value) {
+    var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+    var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+    if (uri.match(re)) {
+      return uri.replace(re, '$1' + key + "=" + value + '$2');
+    }
+    else {
+      return uri + separator + key + "=" + value;
+    }
+  }
+  
+  // Read a page's GET URL variables and return them as an associative array.
+  // source: http://stackoverflow.com/questions/4656843/jquery-get-querystring-from-url
+  function getUrlVars()
+  {
+      var vars = [], hash;
+      var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+      for(var i = 0; i < hashes.length; i++)
+      {
+          hash = hashes[i].split('=');
+          vars.push(hash[0]);
+          vars[hash[0]] = hash[1];
+      }
+      return vars;
+  }
+  
+  // used for javascript sort function
+  function compare(a, b) {
+    if (a<b) {
+      return -1;
+    }
+    if (a>b) {
+      return 1;
+    }
+    // a must be equal to b
+    return 0;
+  }
+  
+  // add, delete and re-order panels
+  updateInfoBoxes( getUrlVars()["status"] );
+  $("#add-panel-btn").click(addPanel);
+  $("#panel-reorder").click(startReordering);
+	$("div[id|='collapsible-panel']").collapse('show');
+	$("#panel-show-all").click(function(){
+		$("div[id|='collapsible-panel']").collapse('show');
+	});
+	$("#panel-collapse-all").click(function(){
+		$("div[id|='collapsible-panel']").collapse('hide');
+	});
+  
+  // search for comics
+  $("#search-btn").on("click",searchComics);
+  $("#inputComicName").on("keydown", function(event){
+    if (event.keyCode == 13) {
+      $("#search-btn").trigger("click");
+      return false;
+    }
+  });
   
   // Freewall dynamic grids for comics display
   // no errors occur even when $("#comics-list") returns [] (empty array)
@@ -283,42 +329,7 @@ $(document).ready(function(){
       return invert * compare(ap, zp);
     });    
   });
-  function compare(a, b) {
-    if (a<b) {
-      return -1;
-    }
-    if (a>b) {
-      return 1;
-    }
-    // a must be equal to b
-    return 0;
-  }
+
   
-  // adds or updates query string parameter
-  // source http://stackoverflow.com/questions/5999118/add-or-update-query-string-parameter
-  function updateQueryStringParameter(uri, key, value) {
-    var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
-    var separator = uri.indexOf('?') !== -1 ? "&" : "?";
-    if (uri.match(re)) {
-      return uri.replace(re, '$1' + key + "=" + value + '$2');
-    }
-    else {
-      return uri + separator + key + "=" + value;
-    }
-  }
-  
-  // Read a page's GET URL variables and return them as an associative array.
-  // source: http://stackoverflow.com/questions/4656843/jquery-get-querystring-from-url
-  function getUrlVars()
-  {
-      var vars = [], hash;
-      var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-      for(var i = 0; i < hashes.length; i++)
-      {
-          hash = hashes[i].split('=');
-          vars.push(hash[0]);
-          vars[hash[0]] = hash[1];
-      }
-      return vars;
-  }
+
 });
