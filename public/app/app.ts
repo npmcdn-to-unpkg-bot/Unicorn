@@ -1,3 +1,4 @@
+var wall;   // for dev purposes wall made accessible in browser console
 $(document).ready(function(){
     function updateSpeechBubble($bubble) {
         $.ajax($bubble.data('edit-url'), {
@@ -58,7 +59,7 @@ $(document).ready(function(){
         var $newPanel = $(json.newPanelHtml);
 				$("ul#panels-list").append($newPanel);
         $newPanel.collapse("show");
-				console.log(json.newPanelHtml);
+				// console.log(json.newPanelHtml);
         updateInfoBoxes(json.statusString);
 			},
 			error: function( xhr, status, errorThrown ) {
@@ -107,7 +108,38 @@ $(document).ready(function(){
 			}
 		});	
 	}
+  
+  // GET request to search for comics
+	function searchComics() {
+    var comicname = $("input#inputComicName:input").val();
+		$.ajax({
+			url: "/comics/searchcomic",
+			type: "POST",
+      data: {comicname: comicname},
+			dataType : "json",
+			success: function( json ) {
+        // json = {newComicsHtml: html}
+        $("#freewall-p").html(json.newComicsHtml);
+          wall = new Freewall("#comics-list");
+          wall.reset(freewallInitObj);
+          wall.fitWidth();
+			},
+			error: function( xhr, status, errorThrown ) {
+				alert( "Sorry, there was a problem sending the request!" );
+				console.log( "Error: " + errorThrown );
+				console.log( "Status: " + status );
+				console.dir( xhr );
+			},
+			
+			// Code to run regardless of success or failure
+			complete: function( xhr, status ) {
+				// alert( "The request is complete!" );
+			}
+		});	
+	}
 	
+  $("#search-btn").on("click",searchComics);
+  
   function updateInfoBoxes(statusString) {
     var sentences = {
       BGAllGood:   '<div class="alert alert-success" role="alert">        \
@@ -156,21 +188,6 @@ $(document).ready(function(){
     });
   }
   
-  // Read a page's GET URL variables and return them as an associative array.
-  // source: http://stackoverflow.com/questions/4656843/jquery-get-querystring-from-url
-  function getUrlVars()
-  {
-      var vars = [], hash;
-      var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-      for(var i = 0; i < hashes.length; i++)
-      {
-          hash = hashes[i].split('=');
-          vars.push(hash[0]);
-          vars[hash[0]] = hash[1];
-      }
-      return vars;
-  }
-  
   function startReordering() {
     $(".sortable-panels").sortable();
     $("#panel-reorder").attr("id","panel-save-order");
@@ -189,22 +206,15 @@ $(document).ready(function(){
       $(this).css("box-shadow", "none");
     });
     */
-  }
-  
+  }  
+	
   updateInfoBoxes( getUrlVars()["status"] );
-  
   $("#add-panel-btn").click(addPanel);
-  
   $("#panel-reorder").click(startReordering);
-	
-  
-	
 	$("div[id|='collapsible-panel']").collapse('show');
-	
 	$("#panel-show-all").click(function(){
 		$("div[id|='collapsible-panel']").collapse('show');
 	});
-	
 	$("#panel-collapse-all").click(function(){
 		$("div[id|='collapsible-panel']").collapse('hide');
 	});
@@ -226,6 +236,64 @@ $(document).ready(function(){
             })
         });
   
+  // Freewall dynamic grids for comics display
+  // no errors occur even when $("#comics-list") returns [] (empty array)
+  wall = new Freewall("#comics-list");
+  freewallInitObj = {
+    selector: '.comics-brick',
+    animate: true,
+    draggable: true,
+    cellW: 200,
+    cellH: 'auto',
+    onResize: function() {
+      wall.fitWidth();
+    }
+  }
+  wall.reset(freewallInitObj);
+  wall.container.find('.comics-brick img').load(function() {
+        wall.fitWidth();
+  });
+  var sortCriterion = "data-created-at";
+  wall.sortBy(function(a, z) {
+    var invert = -1;
+    var regex = /"/g;   // extra double quotes somehow appear at the beginning and end of data strings
+    var ap = Date.parse($(a).attr(sortCriterion).replace(regex,""));
+    var zp = Date.parse($(z).attr(sortCriterion).replace(regex,""));
+    return invert * compare(ap, zp);
+  }); 
+  $("#sort").on("click","li",function customSort(){
+    sortCriterion = $(this).attr("data-name");
+    console.log(sortCriterion);
+    var invert = 1;
+    if (sortCriterion === "data-num-panels" || sortCriterion === "data-created-at") {
+      invert = -1;
+    }
+    wall.sortBy(function(a, z) {
+      var ap = $(a).attr(sortCriterion);
+      var zp = $(z).attr(sortCriterion);
+      if (sortCriterion === "data-created-at") {
+        var regex = /"/g;   // extra double quotes somehow appear at the beginning and end of data strings
+        var ap = Date.parse($(a).attr(sortCriterion).replace(regex,""));
+        var zp = Date.parse($(z).attr(sortCriterion).replace(regex,""));
+      }
+      if (sortCriterion === "data-num-panels") {
+        ap = parseInt(ap,10);
+        zp = parseInt(zp,10);
+      }
+      return invert * compare(ap, zp);
+    });    
+  });
+  function compare(a, b) {
+    if (a<b) {
+      return -1;
+    }
+    if (a>b) {
+      return 1;
+    }
+    // a must be equal to b
+    return 0;
+  }
+  
   // adds or updates query string parameter
   // source http://stackoverflow.com/questions/5999118/add-or-update-query-string-parameter
   function updateQueryStringParameter(uri, key, value) {
@@ -237,5 +305,20 @@ $(document).ready(function(){
     else {
       return uri + separator + key + "=" + value;
     }
+  }
+  
+  // Read a page's GET URL variables and return them as an associative array.
+  // source: http://stackoverflow.com/questions/4656843/jquery-get-querystring-from-url
+  function getUrlVars()
+  {
+      var vars = [], hash;
+      var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+      for(var i = 0; i < hashes.length; i++)
+      {
+          hash = hashes[i].split('=');
+          vars.push(hash[0]);
+          vars[hash[0]] = hash[1];
+      }
+      return vars;
   }
 });

@@ -46,6 +46,7 @@ var upload = multer({ storage : storage}).single('uploadImage');
 // Show all comics
 router.get('/', function (req, res, next) {
     Comic.query()
+        .eager('[users, comicPanels.[speechBubbles]]')
         .then(function (comics) {
             res.render('comics/index', {comics: comics});
         });
@@ -72,8 +73,7 @@ function notEmpty(value) {
 router.post('/searchcomic', function(request, response, next) {
     var searchKeyWords = [];
     searchKeyWords = request.body.comicname.split(" ").filter(notEmpty);
-
-    Comic.query()
+    Comic.query().eager('[users,comicPanels]')
         .then(function (comics) {
             var notUsedComicList = comics;
             var newComicList = [];
@@ -90,10 +90,15 @@ router.post('/searchcomic', function(request, response, next) {
                 }
                 notUsedComicList = tempComicList;
             }
-
-            response.render('comics/index', {comics: newComicList});
+            response.app.render("comics/comics",{layout: false, comics: newComicList},function(err, html){
+              var responseJson = {
+                newComicsHtml: html
+              };
+              console.log(err);
+              response.send(responseJson);
+            });
+            // response.render('comics/comics', {comics: newComicList});
         });
-
 });
 
 router.get('/new', function(request, response, next) {

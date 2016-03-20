@@ -1,0 +1,20 @@
+if (comics.length == 0)
+    h3 No Results
+else
+  div.row
+    div.col-sm-12
+      div#comics-list
+        each comic in comics
+          div.comics-brick(data-title=comic.title, data-num-panels=comic.comicPanels.length, data-first-author=comic.users[0].username, data-created-at=comic.created_at)
+            img(src=comic.comicPanels[0].backgroundImageUrl)
+            div.info
+              h4 
+                a(href=comic.url)= comic.title
+              h5 
+                | Created by 
+                each user in comic.users
+                  | #{user.username}
+                | &nbsp; 
+                b on #{comic.created_at}
+              h5
+                | Number of panels: #{comic.comicPanels.length}
