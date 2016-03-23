@@ -119,10 +119,10 @@ $(document).ready(function(){
 			dataType : "json",
 			success: function( json ) {
         // json = {newComicsHtml: html}
-        $("#freewall-p").html(json.newComicsHtml);
-          wall = new Freewall("#comics-list");
-          wall.reset(freewallInitObj);
-          wall.fitWidth();
+              $("#freewall-p").html(json.newComicsHtml);
+              wall = new Freewall("#comics-list");
+              wall.reset(freewallInitObj);
+              wall.fitWidth();
 			},
 			error: function( xhr, status, errorThrown ) {
 				alert( "Sorry, there was a problem sending the request!" );
@@ -137,6 +137,33 @@ $(document).ready(function(){
 			}
 		});	
 	}
+
+    // GET request to search for contributor
+    function searchContributor() {
+        var contributorname = $("input#inputContributorName:input").val();
+        $.ajax({
+            url: "/users/searchContributor",
+            type: "POST",
+            data: {contributorname: contributorname},
+            dataType : "json",
+            success: function( json ) {
+                // json = {newComicsHtml: html}
+
+                $("#user-list").html(json.newUsersHtml);
+            },
+            error: function( xhr, status, errorThrown ) {
+                alert( "Sorry, there was a problem sending the request!" );
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            },
+
+            // Code to run regardless of success or failure
+            complete: function( xhr, status ) {
+                // alert( "The request is complete!" );
+            }
+        });
+    }
   
   function updateInfoBoxes(statusString) {
     var sentences = {
@@ -281,6 +308,15 @@ $(document).ready(function(){
       return false;
     }
   });
+
+    // search for contributor
+    $("#search-contributor-btn").on("click",searchContributor);
+    $("#inputContributorName").on("keydown", function(event){
+        if (event.keyCode == 13) {
+            $("#search-contributor-btn").trigger("click");
+            return false;
+        }
+    });
   
   // Freewall dynamic grids for comics display
   // no errors occur even when $("#comics-list") returns [] (empty array)
@@ -288,7 +324,7 @@ $(document).ready(function(){
   freewallInitObj = {
     selector: '.comics-brick',
     animate: true,
-    draggable: true,
+    draggable: false,
     cellW: 200,
     cellH: 'auto',
     onResize: function() {

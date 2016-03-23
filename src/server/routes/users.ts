@@ -96,6 +96,53 @@ router.get('/logout', function(req, res) {
     res.redirect('/');
 });
 
+function notEmpty(value) {
+    return value != "";
+}
+
+router.post('/searchContributor', function(request, response, next) {
+    var searchKeyWords = [];
+    searchKeyWords = request.body.contributorname.split(" ").filter(notEmpty);
+
+    User.query()
+        .join('comic_user', 'users.id', '=', 'comic_user.user_id')
+        .distinct('user_id', 'username')
+
+        .then(function(users) {
+
+            var notUsedUserList = users;
+            var newUserList = [];
+
+            for (var j = 0; j < searchKeyWords.length; j ++) {
+                var tempUserList = [];
+                for (var i = 0; i < notUsedUserList.length; i++) {
+                    if (notUsedUserList[i].username.indexOf(searchKeyWords[j]) > -1) {
+                        newUserList.push(notUsedUserList[i]);
+                    }
+                    else {
+                        tempUserList.push(notUsedUserList[i]);
+                    }
+                }
+                notUsedUserList = tempUserList;
+            }
+
+            response.app.render("users/userlist_bottom_panel",{layout: false, users: newUserList},function(err, html){
+                var responseJson = {
+                    newUsersHtml: html
+                };
+                console.log(err);
+                response.send(responseJson);
+            });
+
+            //res.render('users/userlist', { "users": newUserList });
+        })
+        .catch(function(error) {
+            console.log('Error!');
+            console.log(error);
+        });
+
+});
+
 /* GET update user. */
 router.get('/update', function(req, res) {
     var flash = req.flash();

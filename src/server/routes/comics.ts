@@ -49,6 +49,9 @@ router.get('/', function (req, res, next) {
     Comic.query()
         .eager('[users, comicPanels.[speechBubbles]]')
         .then(function (comics) {
+            for (i = 0; i++; i < length(comics)) {
+                sortComicPanels(comics[i]);
+            }
             res.render('comics/index', {comics: comics});
         });
 });
