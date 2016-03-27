@@ -49,7 +49,7 @@ router.get('/', function (req, res, next) {
     Comic.query()
         .eager('[users, comicPanels.[speechBubbles]]')
         .then(function (comics) {
-            for (i = 0; i++; i < length(comics)) {
+            for (var i = 0; i++; i < length(comics)) {
                 sortComicPanels(comics[i]);
             }
             res.render('comics/index', {comics: comics});
@@ -679,6 +679,16 @@ router.put('/:comicId/save-panels-order', function(req, res, next) {
     };
     res.send(response);
   }
+});
+
+router.delete('/:comicId',authorize, function(req, res, next){
+  Comic.query().deleteById(req.params.comicId).then(function(numberOfDeletedRows){
+    console.log('removed', numberOfDeletedRows, 'comic');
+    res.send({statusString: "ComicDeleted"});
+  }).catch(function (err) {
+    console.log(err);
+    res.send({statusString: "ComicNotDeleted"});
+  });
 });
 
 // helper functions

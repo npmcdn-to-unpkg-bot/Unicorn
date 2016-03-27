@@ -12,35 +12,7 @@ block content
     br
 
   div.info-boxes
-    case status
-      when "BGAllGood"
-        div.alert.alert-success(role="alert") 
-          strong Well done! 
-          | Your background image was successfully replaced!
-      when "BGRetry"
-        div.alert.alert-danger(role="alert")
-          strong Ooooooops! 
-          | Your background image was not replaced due to server side problems! Please retry later...
-      when "BGRemind"
-        div.alert.alert-danger(role="alert")
-          strong Ooooooops! 
-          | Your background image was not replaced! Please check your upload file type, image size and url!
-      when "PanelRetry"
-        div.alert.alert-danger(role="alert")
-          strong Ooooooops! 
-          | Your new panel was not added! Please try again...
-      when "PanelAdded"
-        div.alert.alert-success(role="alert")
-          strong Well done! 
-          | Your new panel has been added!
-      when "PanelDeleted"
-        div.alert.alert-success(role="alert")
-          strong Well done! 
-          | Your old panel has been deleted!
-      when "PanelNotDeleted"
-        div.alert.alert-danger(role="alert")
-          strong Ooooooops! 
-          | Your old panel was not deleted! Please try again...
+    
 
   div.btn-group
     button#panel-collapse-all.btn.btn-default Collapse all panels!

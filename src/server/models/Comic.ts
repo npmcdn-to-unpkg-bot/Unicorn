@@ -130,8 +130,17 @@ export class Comic extends BaseModel {
     get savePanelsOrderUrl():string {
         return '/comics/'+this.id+'/save-panels-order'
     }
+    
 
     get requestAccessUrl():string {
         return '/comics/'+this.id+'/request-access';
+    }
+    
+  	/**
+     * Returns the relative URL to (cascade) delete a comic.
+     * @returns {string}
+     */
+    get deleteUrl():string {
+        return '/comics/'+this.id;
     }
 }
