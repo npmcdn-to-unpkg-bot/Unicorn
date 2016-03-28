@@ -10,11 +10,12 @@ else
             div.contenthover
               div.btn-group-vertical.center(role="group",aria-label="actions list")
                 a.btn.btn-primary(href="mailto:#{user.email}") Email
+                a.btn.btn-primary(href="/users/public-profile?username="+user.username) View Profile
                 if currentUser && currentUser.username=="admin"
                   button.delete-user.btn.btn-danger(data-user-id=user.id) Delete
             div.info
               h4
-                a(href="mailto:#{user.email}")=  user.username
+                a.btn.btn-primary(href="/users/public-profile?username="+user.username)=  user.username
             
             
             

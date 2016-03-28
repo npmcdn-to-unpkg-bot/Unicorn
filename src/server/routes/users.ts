@@ -353,41 +353,42 @@ router.post('/:userId/delete', adminAuthorize, function(req,res,next){
     }
 });
 
+// public profile page
+router.get('/public-profile', function(req,res,next){
+    if (!req.query.username) {
+        res.redirect('/users/contributors');
+    }
+    User.query().where('username',req.query.username).first()
+        .then(function(user){
+            ComicUser.query()
+                .where('user_id',user.id)
+                .eager('comics.[comicPanels,users]')
+                .then(function(cus){
+                    console.log(cus);
+                    // cus stands for comic_user plural
+                    var comics = [];
+                    cus.forEach(function (elem, index, array) {
+                        comics.push(elem.comics);
+                    });
+                    res.render('users/public_profile',{
+                        user: user,
+                        comics: comics
+                    });
+                });
+        });
+});
+
 export = router;
 
 /*
-router.post('/:userId/delete', adminAuthorize, function(req,res,next){
-    if (req.body.comicId) {
-        // new owner chosen
-        res.send({statusString: "UserDeleted", comic:null, collaborators:null});
-    } else {
-        // query database for all comics owned by this user
-        ComicUser.query()
-            .where('user_id','=',req.params.userId)
-            .eager('comics')
-            .then(function(cus){
-                if (cus.length == 0) {
-                    // if this user doesn't own any comic, then just delete the user
-                    User.query().deleteById(req.params.userId).then(function (numberOfDeletedRows) {
-                        console.log('removed', numberOfDeletedRows, 'user');
-                        res.send({statusString: "UserDeleted", comic:null, collaborators:null});
-                    }).catch(function(err){
-                        console.log(err);
-                        res.send({statusString: "UserNotDeleted", comic:null, collaborators:null});
-                    });
-                } else {
-                    // this user is a owner of at least one comic -- send back data to prompt admin
+
+            Comic.query()
+                .select('comics.title','comics.created_at','comics.updated_at','comic_user.*')
+                .join('comic_user','comics.id','comic_user.comic_id')
+                .where('user_id',user.id)
+                .eager('comicPanels')
+                .then(function(cus){
                     // stub
-                    res.send({statusString: "UserNotDeleted", comic:null, collaborators:null});
-                }
-            });
-    }
-});
-        User.query().deleteById(req.params.userId).then(function (numberOfDeletedRows) {
-            console.log('removed', numberOfDeletedRows, 'user');
-            res.send({statusString: "UserDeleted", comic:null, collaborators:null});
-        }).catch(function(err){
-            console.log(err);
-            res.send({statusString: "UserNotDeleted", comic:null, collaborators:null});
-        });
+                    console.log(cus);
+                });
 */

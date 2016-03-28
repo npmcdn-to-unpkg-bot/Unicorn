@@ -442,6 +442,7 @@ $(document).ready(function () {
                     } else {
                         dialogBox.append($("<p></p>").append("Please <b>delete</b> the comic if you wish to continue"));
                     }
+                    dialogBox.append($("<p></p>").append("Close dialog to cancel action"));
                     var delBtn = $("<button><button>").attr({ class: "btn btn-danger" }).text("Delete comic");
                     delBtn.on("click", function () {
                         deleteComic(json.comic.id);

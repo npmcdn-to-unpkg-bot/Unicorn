@@ -1,0 +1,16 @@
+extends ../layout
+
+block content
+
+    div.container
+      div.fb-profile
+        img.fb-image-lg(align="left",src="/images/wallpaper.png")
+        img.fb-image-profile.thumbnail(align="left",src="/images/user-pic-placeholder.png")
+      div.fb-profile-text
+        h1= user.username
+        p 
+    br
+    br
+    h2 Comics this user has contributed to 
+    div.freewall-p.comics-list.container
+      include ../comics/comics.jade
