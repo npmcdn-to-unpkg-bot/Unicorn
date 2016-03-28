@@ -4,6 +4,9 @@ const router = express.Router();
 var passport = require ('../middleware/passport');
 import {User} from '../models/User';
 import {Comic} from '../models/Comic';
+import {ComicUser} from '../models/ComicUser';
+import * as authorize from '../middleware/authorization';
+import * as adminAuthorize from '../middleware/adminAuthorize';
 
 var bcrypt = require('bcryptjs');
 
@@ -12,11 +15,25 @@ var bcrypt = require('bcryptjs');
 router.get('/contributors', function(req, res) {
     User.query()
         .join('comic_user', 'users.id', '=', 'comic_user.user_id')
-        .distinct('user_id', 'username')
+        .distinct('user_id as id', 'username')
 
         .then(function(users) {
             console.log(users);
             res.render('users/userlist', { "users": users });
+        })
+        .catch(function(error) {
+            console.log('Error!');
+            console.log(error);
+        });
+        
+});
+
+/* GET all users page. */
+router.get('/users', authorize, function(req, res) {
+    User.query()
+        .then(function(users) {
+            console.log(users);
+            res.render('users/userlist', { users: users, pageTitle: "Users" });
         })
         .catch(function(error) {
             console.log('Error!');
@@ -267,4 +284,109 @@ router.post('/update', function(req, res) {
 
 });
 
+router.post('/:userId/delete', adminAuthorize, function(req,res,next){
+    var comicsOwned = [];
+    if (req.body.newOwner && req.body.comicId) {
+        // new owner chosen
+        ComicUser.query().patch({is_owner:false})
+            .where('comic_id',req.body.comicId)
+            .andWhere('user_id',req.params.userId)
+            .then(function(numberOfAffectedRows){
+                console.log("Removed",numberOfAffectedRows,"owner");
+                ComicUser.query().patch({is_owner:true})
+                    .where('comic_id',req.body.comicId)
+                    .andWhere('user_id',req.body.newOwner)
+                    .then(function(numberOfAffectedRows){
+                        console.log("Added",numberOfAffectedRows,"owner");
+                        respondToClient();
+                    });
+            });
+    } else {
+        respondToClient();
+    }
+    // query table comic_user for all comics owned by this user
+    function respondToClient() {
+        ComicUser.query()
+            .select('comic_user.*','users.username')
+            .join('users','comic_user.user_id','users.id')
+            .then(function(cus){
+                // cus stands for comic_user (plural)
+                comicsOwned = cus.filter(function (elem){
+                    return elem.user_id==req.params.userId && elem.is_owner;
+                });
+                if (comicsOwned.length == 0) {
+                    // if this user doesn't own any comic, then just delete the user
+                    deleteAndRespond(cus);
+                } else {
+                    // this user is a owner of at least one comic send back data for one comic to prompt admin
+                    respondWithPrompt(cus);
+                }
+            }).catch(function(error) {
+                console.log(error);
+            });
+    }
+    
+    function deleteAndRespond(cus) {
+        User.query().deleteById(req.params.userId).then(function (numberOfDeletedRows) {
+                    console.log('removed', numberOfDeletedRows, 'user');
+                    res.send({statusString: "UserDeleted", comic:null, collaborators:null});
+                }).catch(function(err){
+                    console.log(err);
+                    res.send({statusString: "UserNotDeleted", comic:null, collaborators:null});
+                });
+    }
+    function respondWithPrompt(cus) {
+        var comicTarget = {title: "", id: comicsOwned[0].comic_id};
+        var collaborators = cus.filter(function(elem){
+            return elem.comic_id==comicTarget.id && !elem.is_owner;
+        });
+        Comic.query()
+            .findById(comicTarget.id).then(function(comic){
+            comicTarget.title = comic.title;
+            var collTarget = [];
+            collaborators.forEach(function (elem, index, array) {
+                collTarget.push({name:elem.username, id:elem.user_id});
+            });
+            res.send({statusString: "UserNotDeleted", comic:comicTarget, collaborators:collTarget});
+        });
+    }
+});
+
 export = router;
+
+/*
+router.post('/:userId/delete', adminAuthorize, function(req,res,next){
+    if (req.body.comicId) {
+        // new owner chosen
+        res.send({statusString: "UserDeleted", comic:null, collaborators:null});
+    } else {
+        // query database for all comics owned by this user
+        ComicUser.query()
+            .where('user_id','=',req.params.userId)
+            .eager('comics')
+            .then(function(cus){
+                if (cus.length == 0) {
+                    // if this user doesn't own any comic, then just delete the user
+                    User.query().deleteById(req.params.userId).then(function (numberOfDeletedRows) {
+                        console.log('removed', numberOfDeletedRows, 'user');
+                        res.send({statusString: "UserDeleted", comic:null, collaborators:null});
+                    }).catch(function(err){
+                        console.log(err);
+                        res.send({statusString: "UserNotDeleted", comic:null, collaborators:null});
+                    });
+                } else {
+                    // this user is a owner of at least one comic -- send back data to prompt admin
+                    // stub
+                    res.send({statusString: "UserNotDeleted", comic:null, collaborators:null});
+                }
+            });
+    }
+});
+        User.query().deleteById(req.params.userId).then(function (numberOfDeletedRows) {
+            console.log('removed', numberOfDeletedRows, 'user');
+            res.send({statusString: "UserDeleted", comic:null, collaborators:null});
+        }).catch(function(err){
+            console.log(err);
+            res.send({statusString: "UserNotDeleted", comic:null, collaborators:null});
+        });
+*/

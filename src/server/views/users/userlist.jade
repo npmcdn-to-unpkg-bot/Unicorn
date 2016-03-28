@@ -5,13 +5,14 @@ block content
     div.container
       div.row
         div.col-lg-6.vcenter
-          h1= 'Contributors'
-
+          h1= pageTitle
+          
         div.col-lg-6.vcenter
           div.input-group(style="margin-bottom: 7px")
             input#inputContributorName.form-control(type="text", placeholder="Search contributor", name="contributorname")
             div.input-group-btn
               button#search-contributor-btn.btn.btn-default(type="button") Search
-
-    div#user-list.container
+      div.row  
+        div.info-boxes.col-lg-12
+    div.freewall-p.user-list.container
       include ./userlist_bottom_panel.jade

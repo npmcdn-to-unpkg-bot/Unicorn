@@ -3,6 +3,7 @@ html
   head
     title= title
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css')
+    link(rel='stylesheet', href='//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css')
     link(rel='stylesheet', href='/css/app.css')
   body
     nav(class='navbar navbar-inverse')
@@ -19,6 +20,8 @@ html
               a(href='/comics')='Comics'
             li
               a(href='/users/contributors')='Contributors'
+            li
+              a(href='/users/users')='Users'
           ul(class='nav navbar-nav navbar-right')
             if currentUser
               li(class='dropdown')
@@ -39,8 +42,8 @@ html
     block content
 
     script(src='https://code.jquery.com/jquery-2.2.0.min.js')
-    script(src='https://code.jquery.com/ui/1.11.4/jquery-ui.min.js')
     script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js')
+    script(src='https://code.jquery.com/ui/1.11.4/jquery-ui.min.js')
     script(src='https://npmcdn.com/imagesloaded@4.1/imagesloaded.pkgd.min.js')
     script(src='/app/freewall.js')
     script(src='/app/contentHover.js')

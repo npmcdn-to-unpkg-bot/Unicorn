@@ -9,6 +9,7 @@ import {ComicPanel} from '../models/ComicPanel';
 import {SpeechBubble} from "../models/SpeechBubble";
 import {SavedComic} from '../models/SavedComic';
 import * as authorize from '../middleware/authorization';
+import * as adminAuthorize from '../middleware/adminAuthorize';
 
 // handling user background image uploads
 var multer = require('multer');
@@ -252,7 +253,7 @@ router.post('/:id/request-access', function(request, response, next){
         });
 });
 
-router.get('/:id/edit', function(request, response, next) {
+router.get('/:id/edit', authorize, function(request, response, next) {
 	// this is the query string
 	var status = request.query.status;
     Comic.query()
@@ -681,7 +682,7 @@ router.put('/:comicId/save-panels-order', function(req, res, next) {
   }
 });
 
-router.delete('/:comicId',authorize, function(req, res, next){
+router.delete('/:comicId',adminAuthorize, function(req, res, next){
   Comic.query().deleteById(req.params.comicId).then(function(numberOfDeletedRows){
     console.log('removed', numberOfDeletedRows, 'comic');
     res.send({statusString: "ComicDeleted"});

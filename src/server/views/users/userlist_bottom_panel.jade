@@ -1,3 +1,21 @@
-each user in users
-  li
-    a(href="mailto:#{user.email}")=  user.username + ' (' + user.user_id + ')'
+if (users.length == 0)
+    h3 No Results
+else
+  div.row
+    div.col-sm-12
+      div#users-list
+        each user in users
+          div.freewall-brick(data-user-name=user.username, data-user-id=user.id, data-user-email=user.email)
+            img.hover-img(src="/images/user-pic-placeholder.png")
+            div.contenthover
+              div.btn-group-vertical.center(role="group",aria-label="actions list")
+                a.btn.btn-primary(href="mailto:#{user.email}") Email
+                if currentUser && currentUser.username=="admin"
+                  button.delete-user.btn.btn-danger(data-user-id=user.id) Delete
+            div.info
+              h4
+                a(href="mailto:#{user.email}")=  user.username
+            
+            
+            
+            

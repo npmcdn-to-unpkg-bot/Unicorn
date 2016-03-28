@@ -11,7 +11,11 @@ exports.up = function(knex, Promise) {
     knex.schema
       .raw('ALTER TABLE comic_user DROP CONSTRAINT comic_user_comic_id_foreign'),
     knex.schema
-      .raw('ALTER TABLE comic_user ADD CONSTRAINT comic_user_comic_id_foreign FOREIGN KEY (comic_id) REFERENCES comics (id) ON DELETE CASCADE')
+      .raw('ALTER TABLE comic_user ADD CONSTRAINT comic_user_comic_id_foreign FOREIGN KEY (comic_id) REFERENCES comics (id) ON DELETE CASCADE'),
+    knex.schema
+      .raw('ALTER TABLE saved_comics DROP CONSTRAINT saved_comics_comic_id_foreign'),
+    knex.schema
+      .raw('ALTER TABLE saved_comics ADD CONSTRAINT saved_comics_comic_id_foreign FOREIGN KEY (comic_id) REFERENCES comics (id) ON DELETE CASCADE')
 	]);
 };
 
@@ -28,6 +32,10 @@ exports.down = function(knex, Promise) {
     knex.schema
       .raw('ALTER TABLE comic_user DROP CONSTRAINT comic_user_comic_id_foreign'),
     knex.schema
-      .raw('ALTER TABLE comic_user ADD CONSTRAINT comic_user_comic_id_foreign FOREIGN KEY (comic_id) REFERENCES comics (id)')
+      .raw('ALTER TABLE comic_user ADD CONSTRAINT comic_user_comic_id_foreign FOREIGN KEY (comic_id) REFERENCES comics (id)'),
+    knex.schema
+      .raw('ALTER TABLE saved_comics DROP CONSTRAINT saved_comics_comic_id_foreign'),
+    knex.schema
+      .raw('ALTER TABLE saved_comics ADD CONSTRAINT saved_comics_comic_id_foreign FOREIGN KEY (comic_id) REFERENCES comics (id)')
 	]);
 };

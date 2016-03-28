@@ -107,10 +107,11 @@ $(document).ready(function () {
             dataType: "json",
             success: function (json) {
                 // json = {newComicsHtml: html}
-                $("#freewall-p").html(json.newComicsHtml);
+                $(".freewall-p.comics-list").html(json.newComicsHtml);
                 wall = new Freewall("#comics-list");
                 wall.reset(freewallInitObj);
                 wall.fitWidth();
+                bindHoverButton();
             },
             error: function (xhr, status, errorThrown) {
                 alert("Sorry, there was a problem sending the request!");
@@ -134,7 +135,11 @@ $(document).ready(function () {
             dataType: "json",
             success: function (json) {
                 // json = {newComicsHtml: html}
-                $("#user-list").html(json.newUsersHtml);
+                $(".freewall-p.user-list").html(json.newUsersHtml);
+                wall = new Freewall("#users-list");
+                wall.reset(freewallInitObj);
+                wall.fitWidth();
+                bindHoverButton();
             },
             error: function (xhr, status, errorThrown) {
                 alert("Sorry, there was a problem sending the request!");
@@ -193,6 +198,14 @@ $(document).ready(function () {
             ComicNotDeleted: '<div class="alert alert-danger" role="alert">        \
                           <strong> Ooooooops! </strong>                       \
                           Your Comic was not deleted! Please try again or refresh the page    \
+                        </div>',
+            UserDeleted: '<div class="alert alert-success" role="alert">        \
+                          <strong> Well done! </strong>                       \
+                          This user has been deleted!    \
+                        </div>',
+            UserNotDeleted: '<div class="alert alert-danger" role="alert">        \
+                          <strong> Ooooooops! </strong>                       \
+                          This user was not deleted! Please try again or refresh the page    \
                         </div>'
         };
         var closeAlert = '<a href=' + '#' + ' class="close" data-dismiss="alert" aria-label="close">&times;</a>';
@@ -299,9 +312,20 @@ $(document).ready(function () {
     });
     // Freewall dynamic grids for comics display
     // no errors occur even when $("#comics-list") returns [] (empty array)
-    wall = new Freewall("#comics-list");
+    // using singleton for wall
+    var freewallTarget = (function () {
+        var candidates = ["#comics-list", "#users-list"];
+        var str = "#comics-list";
+        candidates.forEach(function (element, index, array) {
+            if ($(element).length > 0) {
+                str = element;
+            }
+        });
+        return str;
+    })();
+    wall = new Freewall(freewallTarget);
     freewallInitObj = {
-        selector: '.comics-brick',
+        selector: '.freewall-brick',
         animate: true,
         draggable: false,
         cellW: 200,
@@ -311,17 +335,19 @@ $(document).ready(function () {
         }
     };
     wall.reset(freewallInitObj);
-    wall.container.find('.comics-brick img').load(function () {
+    wall.container.find('.freewall-brick img').load(function () {
         wall.fitWidth();
     });
     var sortCriterion = "data-created-at";
-    wall.sortBy(function (a, z) {
-        var invert = -1;
-        var regex = /"/g; // extra double quotes somehow appear at the beginning and end of data strings
-        var ap = Date.parse($(a).attr(sortCriterion).replace(regex, ""));
-        var zp = Date.parse($(z).attr(sortCriterion).replace(regex, ""));
-        return invert * compare(ap, zp);
-    });
+    if ($("#comics-list").length > 0) {
+        wall.sortBy(function (a, z) {
+            var invert = -1;
+            var regex = /"/g; // extra double quotes somehow appear at the beginning and end of data strings
+            var ap = Date.parse($(a).attr(sortCriterion).replace(regex, ""));
+            var zp = Date.parse($(z).attr(sortCriterion).replace(regex, ""));
+            return invert * compare(ap, zp);
+        });
+    }
     $("#sort").on("click", "li", function customSort() {
         sortCriterion = $(this).attr("data-name");
         console.log(sortCriterion);
@@ -347,7 +373,7 @@ $(document).ready(function () {
     // delete a comic -- admin
     function deleteComic(comicId) {
         $.ajax({
-            url: "/comics/"+comicId,
+            url: "/comics/" + comicId,
             type: "DELETE",
             data: {},
             dataType: "json",
@@ -355,7 +381,7 @@ $(document).ready(function () {
                 // json = {statusString: "ComicDeleted"/"ComicNotDeleted"}
                 updateInfoBoxes(json.statusString);
                 if (json.statusString == "ComicDeleted") {
-                    $("div.comics-brick[data-comic-id=" + comicId + "]").remove();
+                    $("div.freewall-brick[data-comic-id=" + comicId + "]").remove();
                 }
                 wall.refresh();
             },
@@ -367,12 +393,86 @@ $(document).ready(function () {
             },
             // Code to run regardless of success or failure
             complete: function (xhr, status) {
-                alert("The request is complete!");
+                //alert("The request is complete!");
+            }
+        });
+    }
+    // delete a user -- admin
+    function deleteUser(userId, newOwner, comicId) {
+        $.ajax({
+            url: "/users/" + userId + "/delete",
+            type: "POST",
+            data: { userId: userId, newOwner: newOwner, comicId: comicId },
+            dataType: "json",
+            success: function (json) {
+                // json = {statusString: "UserDeleted"/"UserNotDeleted", comic:comic, collaborators:collaborators}
+                //    where collaborators is an array of {name:name, id:id}'s
+                //          and comic an object of the form {title:title, id:id}
+                updateInfoBoxes(json.statusString);
+                if (json.statusString == "UserDeleted") {
+                    $("div.freewall-brick[data-user-id=" + userId + "]").remove();
+                    wall.refresh();
+                }
+                else {
+                    var dialogBox = $("<div></div>").attr({ class: "assign-user" });
+                    var options = $("<div></div>").attr({ class: 'new-owner-select btn-group-vertical' });
+                    if (json.comic) {
+                        dialogBox.attr({ title: "Cannot delete User!" });
+                        dialogBox.append($("<p></p>").append("<b>This user owns a comic: " + json.comic.title + "<b>"));
+                        if (json.collaborators.length > 0) {
+                            dialogBox.append($("<p></p>").append("Please select a <b>new owner</b> from the following collaborators if you wish to continue"));
+                            json.collaborators.forEach(function (elem, index, array) {
+                                var newOwner = $("<button></button>").attr({
+                                    "class": "btn btn-warning", 
+                                    "data-user-id": userId,
+                                    "data-new-owner-id": elem.id,
+                                    "data-comic-id": json.comic.id
+                                }).text(elem.name);
+                                newOwner.on("click",function(){
+                                    var button = $(this)
+                                    var uid = button.attr("data-user-id");
+                                    var ownerId = button.attr("data-new-owner-id");
+                                    var cid = button.attr("data-comic-id");
+                                    dialogBox.dialog("close");
+                                    deleteUser(uid,ownerId,cid);
+                                });
+                                options.append(newOwner);
+                            });
+                        }
+                    } else {
+                        dialogBox.append($("<p></p>").append("Please <b>delete</b> the comic if you wish to continue"));
+                    }
+                    var delBtn = $("<button><button>").attr({ class: "btn btn-danger" }).text("Delete comic");
+                    delBtn.on("click", function () {
+                        deleteComic(json.comic.id);
+                        dialogBox.dialog("close");
+                    });
+                    // this is a hack -- for some reason delBtn is appended twice if I don't do eq(0)
+                    options.eq(0).append(delBtn.eq(0));
+                    dialogBox.append(options);
+                    $("body").append(dialogBox);
+                    dialogBox.dialog({
+                        modal: true
+                    });
+                }
+            },
+            error: function (xhr, status, errorThrown) {
+                alert("Sorry, there was a problem sending the request!");
+                console.log("Error: " + errorThrown);
+                console.log("Status: " + status);
+                console.dir(xhr);
+            },
+            // Code to run regardless of success or failure
+            complete: function (xhr, status) {
+                // alert("The request is complete!");
             }
         });
     }
     // wait until images are loaded and all css and/or js styling (hopefully) finished execution
     $("img").imagesLoaded(function () {
+        bindHoverButton();
+    });
+    function bindHoverButton() {
         // content hover plugin to add effects when mouse pointer hovers over an image.
         $(".hover-img").contenthover({
             overlay_background: 'rgb(125, 131, 136)',
@@ -388,16 +488,18 @@ $(document).ready(function () {
                 elem1.children(".btn-group-vertical.center").center(true);
             });
         });
-        $(".delete-comic.btn").each(function(){
-          var elem = $(this);
-          elem.on("click",function(){
-            console.log("clicked");
-            deleteComic($(this).attr("data-comic-id"));
-          });
+        $(".delete-comic.btn").each(function () {
+            var elem = $(this);
+            elem.on("click", function () {
+                console.log("clicked");
+                deleteComic($(this).attr("data-comic-id"));
+            });
         });
-    });
+        $("button.delete-user").on("click", function () {
+            deleteUser($(this).attr("data-user-id"));
+        });
+    }
     // a little plugin to center any element (1) with fixed width and height and (2) with a parent that has fixed width and height
-    // put it before your first use
     // source: http://stackoverflow.com/questions/210717/using-jquery-to-center-a-div-on-the-screen
     jQuery.fn.center = function (parent) {
         if (parent) {

@@ -5,7 +5,7 @@ else
     div.col-sm-12
       div#comics-list
         each comic in comics
-          div.comics-brick(data-title=comic.title, data-num-panels=comic.comicPanels.length, data-first-author=comic.users[0].username, data-created-at=comic.created_at, data-comic-id=comic.id)
+          div.freewall-brick(data-title=comic.title, data-num-panels=comic.comicPanels.length, data-first-author=comic.users[0].username, data-created-at=comic.created_at, data-comic-id=comic.id)
             img.hover-img(src=comic.comicPanels[0].backgroundImageUrl)
             div.contenthover
               div.btn-group-vertical.center(role="group",aria-label="actions list")
@@ -18,7 +18,7 @@ else
               h5 
                 | Created by 
                 each user in comic.users
-                  | #{user.username}
+                  | #{user.username}  &nbsp; 
                 | &nbsp; 
                 b on #{comic.created_at}
               h5
