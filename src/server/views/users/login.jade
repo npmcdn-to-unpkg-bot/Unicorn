@@ -5,6 +5,6 @@ block content
     -if(flash.loginMessage)
       .alert.alert-danger #{flash.loginMessage}
     form#fLogin(name="login",method="post",action="/users/login")
-        input#inputUserName(type="text", placeholder="user name", name="username")
+        input#inputUserName(type="text", placeholder="user name", name="username", value=userName)
         input#inputUserPassword(type="password", placeholder="password", name="userpassword")
         button#btnSubmit(type="submit") submit

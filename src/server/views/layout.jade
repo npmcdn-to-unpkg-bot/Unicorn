@@ -20,8 +20,12 @@ html
               a(href='/comics')='Comics'
             li
               a(href='/users/contributors')='Contributors'
-            li
-              a(href='/users/users')='Users'
+            if currentUser && currentUser.username=="admin"
+              li
+                a(href='/users/users')='Users'
+            else
+              li
+                a(href='/users/login?user=admin')='Admin Login'
           ul(class='nav navbar-nav navbar-right')
             if currentUser
               li(class='dropdown')

@@ -65,7 +65,8 @@ router.get('/login', function(req, res) {
     var flash = req.flash();
     res.render('users/login', {
         title: 'Log in!',
-        flash: flash
+        flash: flash,
+        userName: req.query.user
     });
 });
 

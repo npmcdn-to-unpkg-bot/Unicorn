@@ -3,3 +3,16 @@ extends layout
 block content
   h1= title
   p Welcome to #{title}
+
+  if currentUser && currentUser.username=="admin"
+    div.info.alert.alert-info
+      b Looks like you are an administrator!
+      br
+      | Please note that you are authorized to delete comics and users. Deletion cannot be undone. When you are deleting a user, please
+      | assign new owners of the comics owned by that user, or delete their comics.
+      br
+      b Start by navigating to 
+      a(href="/comics") comics
+      | &nbsp; or 
+      a(href="/users/users") users 
+      | page.  
