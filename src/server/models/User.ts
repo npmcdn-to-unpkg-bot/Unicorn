@@ -7,6 +7,15 @@ import {SavedComic} from './SavedComic';
 import {BaseModel} from './BaseModel';
 
 export class User extends BaseModel {
+    id: string;
+    username: string;
+    profile_picture_url: string;
+    email: string;
+    password: string;
+    location: string;
+    fullname: string;
+    gender: string;
+
     static get tableName(): string {
         return 'users';
     }
@@ -14,7 +23,7 @@ export class User extends BaseModel {
     static get jsonSchema() {
         return {
             type: 'object',
-            required: ['username', 'email', 'password'],
+            required: ['username', 'email', 'password', 'profile_picture_url'],
             properties: {
                 id: { type: 'string', minLength: 36, maxLength: 36 },
                 created_at: { type: 'string', maxLength: 255 },
@@ -25,7 +34,7 @@ export class User extends BaseModel {
                 location: { type: 'string', maxLength: 255 },
                 fullname: { type: 'string', maxLength: 255 },
                 gender: { type: 'string', maxLength: 255},
-                saved_comics: { type: 'string', minLength: 36, maxLength: 36 }
+                profile_picture_url: { type: 'string', maxLength: 255 }
             }
         }
     }
@@ -72,5 +81,9 @@ export class User extends BaseModel {
                 }
             }            
         }
+    }
+
+    get profilePictureUrl(): string {
+        return this.profile_picture_url;
     }
 }

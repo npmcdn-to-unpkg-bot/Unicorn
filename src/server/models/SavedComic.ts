@@ -20,6 +20,8 @@ export class SavedComic extends BaseModel {
 			properties: {
 				user_id: { type: 'string', minLength: 36, maxLength: 36 },
 				comic_id: { type: 'string', minLength: 36, maxLength: 36 },
+				created_at: {type: 'string', maxLength: 255},
+                updated_at: {type: 'string', maxLength: 255}
 			}
 		}
 	}

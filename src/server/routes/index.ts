@@ -38,8 +38,6 @@ router.get('/', function(req, res, next) {
 });
 
 
-
-
 /* GET upload a comic. */
 router.get('/upload', function(req, res, next) {	
 	Comic.query()

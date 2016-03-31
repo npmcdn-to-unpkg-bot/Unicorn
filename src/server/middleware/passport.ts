@@ -34,7 +34,8 @@ var bcrypt = require('bcrypt');
                     .insert({
                         'username': username,
                         'email': req.body.useremail,
-                        'password': hash
+                        'password': hash, 
+                        'profile_picture_url': '/images/default-profile-picture.png'
                     })
                     .then(function(user) {
                         console.log('User added');

@@ -8,6 +8,15 @@ block content
     .alert.alert-danger #{flash.usernameFail}
   -if(flash.updateSuccess)
     .alert.alert-success #{flash.updateSuccess}
+
+  form(role='form', method='post', action='/users/replaceProfilePicture', enctype="multipart/form-data")
+    .form-group
+      label.col-sm-2.control-label(for='uploadImage') Profile Picture
+      .col-sm-4
+        input.form-control(type="file", name="uploadImage")
+      .col-sm-offset-2.col-sm-4
+        input.btn.btn-warning(type='submit', value='Replace now!')
+
   form(class='form-horizontal', action='/users/update', method='POST')
     .form-group
       label.col-sm-2.control-label(for='username') Username

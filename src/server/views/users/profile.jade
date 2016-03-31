@@ -7,6 +7,8 @@ block content
     h3 Basic Information
   form(class='form-horizontal', action='/users/update', method='POST')
     .form-group
+      img(src=user.profilePictureUrl)
+    .form-group
       label.col-sm-2.control-label(for='username') Username
       .col-sm-4
         div.controls
