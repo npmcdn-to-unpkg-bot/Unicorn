@@ -270,7 +270,6 @@ router.get('/:comicId/edit', authorize.loggedIn, authorize.canEditComic, functio
 
         }).then(function(owner:User) {
             response.render('comics/edit', {comic: thisComic, owner: owner, status: status});
-			console.log(thisComic.comicPanels);
         });
 });
 
@@ -630,8 +629,6 @@ router.put('/:comicId/save-panels-order', authorize.loggedIn, authorize.canEditC
   var comicId = req.params.comicId;
   var newOrder = req.body["newOrder[]"];   // an array of old positions
   var numPanels;
-  console.log(newOrder);
-  console.log(req.body);
   var targetComic;
   
   Comic.query().findById(comicId).eager('comicPanels').then(function(comic){
@@ -657,13 +654,11 @@ router.put('/:comicId/save-panels-order', authorize.loggedIn, authorize.canEditC
       return p;
     }
     Promise.all(promises).then(function(results){
-      console.log(results);
       var promises1 = [];
       targetComic.comicPanels.forEach(function(panel){
         promises1.push(promiseGenerator(panel,0));
       });
       Promise.all(promises1).then(function(results){
-        console.log(results);
         status_str = 'PanelReordered';
         respondToUser();
       },function(reason){
@@ -686,7 +681,37 @@ router.put('/:comicId/save-panels-order', authorize.loggedIn, authorize.canEditC
     var response = {
       statusString: status_str
     };
-    res.send(response);
+    User
+      .query()
+      .whereIn(
+          'id',
+          ComicUser.query()
+              .select('user_id')
+              .where('comic_id', targetComic.id)
+              .where('is_owner', true)
+      )
+      .first()
+      .then(function(owner:User){
+          console.log('Hi '+owner.username+'!\n\n'+
+                  'The user "'+req.user.username+'" has edited your comic, '+
+                  targetComic.title+'. Follow the link below to check it out!\n\n'+
+                  'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id);
+          sendmail({
+              from: 'ubc-unicorn@peter.deltchev.com',
+              to: owner.email,
+              subject: '[Unicorn] A user has edited your comic!',
+              content:
+                  'Hi '+owner.username+'!\n\n'+
+                  'The user "'+req.user.username+'" has edited your comic, '+
+                  targetComic.title+'. Follow the link below to check it out!\n\n'+
+                  'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id
+          }, function(err, reply){
+              console.log('=== Sendmail results:');
+              console.log(err);
+              console.log(reply);
+          });
+          res.send(response);
+      });
   }
 });
 
