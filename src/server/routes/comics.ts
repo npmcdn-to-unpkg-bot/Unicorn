@@ -373,7 +373,7 @@ router.post('/:comicId/panels/:panelId/speech-bubbles', authorize.loggedIn, auth
                   .then(function(owner:User){
                       var req = request;
                       console.log('Hi '+owner.username+'!\n\n'+
-                              'The user "'+req.user.username+'" has edited (added panels to) your comic, '+
+                              'The user "'+req.user.username+'" has edited speech bubbles of your comic, '+
                               targetComic.title+'. Follow the link below to check it out!\n\n'+
                               'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id);
                       sendmail({
@@ -382,7 +382,7 @@ router.post('/:comicId/panels/:panelId/speech-bubbles', authorize.loggedIn, auth
                           subject: '[Unicorn] A user has edited your comic!',
                           content:
                               'Hi '+owner.username+'!\n\n'+
-                              'The user "'+req.user.username+'" has edited (added panels to) your comic, '+
+                              'The user "'+req.user.username+'" has edited speech bubbles of your comic, '+
                               targetComic.title+'. Follow the link below to check it out!\n\n'+
                               'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id
                       }, function(err, reply){
@@ -427,7 +427,7 @@ router.put('/speech-bubbles/:id', authorize.loggedIn, authorize.canEditComic, fu
               .then(function(owner:User){
                   var req = request;
                   console.log('Hi '+owner.username+'!\n\n'+
-                          'The user "'+req.user.username+'" has edited (added panels to) your comic, '+
+                          'The user "'+req.user.username+'" has edited speech bubbles of your comic, '+
                           targetComic.title+'. Follow the link below to check it out!\n\n'+
                           'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id);
                   sendmail({
@@ -436,7 +436,7 @@ router.put('/speech-bubbles/:id', authorize.loggedIn, authorize.canEditComic, fu
                       subject: '[Unicorn] A user has edited your comic!',
                       content:
                           'Hi '+owner.username+'!\n\n'+
-                          'The user "'+req.user.username+'" has edited (added panels to) your comic, '+
+                          'The user "'+req.user.username+'" has edited speech bubbles of your comic, '+
                           targetComic.title+'. Follow the link below to check it out!\n\n'+
                           'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id
                   }, function(err, reply){

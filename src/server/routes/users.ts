@@ -309,6 +309,22 @@ router.post('/update', function(req, res) {
             });
     }
     res.redirect('/users/profile');
+    console.log('Hi '+req.user.username+'!\n\n Your profile information has been updated.\n'+
+                'If the changes are not made by you, please report to Unicorn team. Happy comic editing! :D \n\n' +
+                'View the changes here after you log in: ' + 'http://ubc-unicorn.deltchev.com/users/profile');
+    sendmail({
+        from: 'ubc-unicorn@peter.deltchev.com',
+        to: req.user.email,
+        subject: '[Unicorn] Your user profile has been updated!',
+        content:
+            'Hi '+req.user.username+'!\n\n Your profile information has been updated.\n'+
+            'If the changes are not made by you, please report to Unicorn team. Happy comic editing! :D \n\n' +
+            'View the changes here after you log in: ' + 'http://ubc-unicorn.deltchev.com/users/profile'
+    }, function(err, reply){
+        console.log('=== Sendmail results:');
+        console.log(err);
+        console.log(reply);
+    });
 });
 
 router.post('/replaceProfilePicture', upload, function(req, res) {
