@@ -42,8 +42,7 @@ var upload = multer({ storage: storage }).single('uploadImage');
 router.get('/contributors', function(req, res) {
     User.query()
         .join('comic_user', 'users.id', '=', 'comic_user.user_id')
-        .distinct('user_id', 'username')
-
+        .distinct('user_id', 'username','profile_picture_url')
         .then(function(users) {
             console.log(users);
             res.render('users/userlist', { "users": users });
@@ -92,7 +91,8 @@ router.get('/login', function(req, res) {
     var flash = req.flash();
     res.render('users/login', {
         title: 'Log in!',
-        flash: flash
+        flash: flash,
+        userName: req.query.user
     });
 });
 
@@ -150,7 +150,7 @@ router.post('/searchContributor', function(request, response, next) {
 
     User.query()
         .join('comic_user', 'users.id', '=', 'comic_user.user_id')
-        .distinct('user_id', 'username')
+        .distinct('user_id', 'username','profile_picture_url')
 
         .then(function(users) {
 

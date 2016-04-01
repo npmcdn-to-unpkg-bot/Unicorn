@@ -6,7 +6,7 @@ else
       div#users-list
         each user in users
           div.freewall-brick(data-user-name=user.username, data-user-id=user.id, data-user-email=user.email)
-            img.hover-img(src="/images/user-pic-placeholder.png")
+            img.hover-img(src=user.profile_picture_url)
             div.contenthover
               div.btn-group-vertical.center(role="group",aria-label="actions list")
                 a.btn.btn-primary(href="mailto:#{user.email}") Email
