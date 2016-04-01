@@ -106,16 +106,16 @@ router.post('/searchcomic', function(request, response, next) {
         });
 });
 
-router.get('/new', authorize, function(request, response, next) {
+router.get('/new', authorize.loggedIn, function(request, response, next) {
     response.render('comics/new');
 });
 
-router.get('/:id', function(request, response, next) {
+router.get('/:comicId', function(request, response, next) {
     // if statements doesn't seems to execute in query, have some duplicated code for now
     if (request.user == null) {
     
         Comic.query()
-        .findById(request.params.id)
+        .findById(request.params.comicId)
         .eager('[users, comicPanels.[speechBubbles]]')
         .then(function (comic) {
             var flash = request.flash();
@@ -132,7 +132,7 @@ router.get('/:id', function(request, response, next) {
     else {
 
         Comic.query()
-            .findById(request.params.id)
+            .findById(request.params.comicId)
             .eager('[users, comicPanels.[speechBubbles]]')
             .then(function (comic) {
                 comic
@@ -150,7 +150,7 @@ router.get('/:id', function(request, response, next) {
                     
                     // 'comic' after relatedQuery seems to change the comic, requery for now 
                     Comic.query()
-                        .findById(request.params.id)
+                        .findById(request.params.comicId)
                         .eager('[users, comicPanels.[speechBubbles]]')
                         .then(function (comic) {
 							sortComicPanels(comic);
@@ -169,7 +169,7 @@ router.get('/:id', function(request, response, next) {
     }
 });
 
-router.get('/:id/favourite', function(request, response, next) {
+router.get('/:comicId/favourite', function(request, response, next) {
     User.query()
         .where('id', '=', request.user.id)
         .then(function(user) {
@@ -179,39 +179,39 @@ router.get('/:id/favourite', function(request, response, next) {
                 .returning('*')
                 .insert({
                     user_id: user[0].id,
-                    comic_id: request.params.id
+                    comic_id: request.params.comicId
                 })
         })
         .then(function(savedComic) {
             console.log(savedComic.user_id);
             console.log(savedComic.comic_id);
             request.flash('favouriteSuccess', 'Comic favourited to your account!');
-            response.redirect('/comics/' + request.params.id);
+            response.redirect('/comics/' + request.params.comicId);
         })    
         .catch(function(err) {
             console.log('Error');
             console.log(err);
             request.flash('alreadySaved', 'This comic has already been favourited.');
-            response.redirect('/comics/' + request.params.id);
+            response.redirect('/comics/' + request.params.comicId);
         });
 
 });
 
-router.get('/:id/unfavourite', function(request, response, next) {
+router.get('/:comicId/unfavourite', function(request, response, next) {
     SavedComic.query()
         .where({
             'user_id': request.user.id,
-            'comic_id': request.params.id
+            'comic_id': request.params.comicId
         })
         .del()
         .then(function(delCount) {
             console.log(delCount);
             if (delCount === 0) {
                 request.flash('alreadyUnfavourited', 'Comic is already unfavourited.');
-                response.redirect('/comics/' + request.params.id);
+                response.redirect('/comics/' + request.params.comicId);
             } else {
                 request.flash('unfavouriteSuccess', 'Comic has been unfavourited.');
-                response.redirect('/comics/' + request.params.id);
+                response.redirect('/comics/' + request.params.comicId);
             }
         })
         .catch(function(err) {
@@ -220,13 +220,13 @@ router.get('/:id/unfavourite', function(request, response, next) {
 });
 
 // Request edit access to a comic
-router.post('/:id/request-access', function(request, response, next){
+router.post('/:comicId/request-access', function(request, response, next){
     // get the owner of the comic
     var comic:Comic;
     var owner:User;
 
     Comic.query()
-        .findById(request.params.id)
+        .findById(request.params.comicId)
         .eager('users')
         .then(function(thisComic:Comic) {
             comic = thisComic;
@@ -253,11 +253,11 @@ router.post('/:id/request-access', function(request, response, next){
         });
 });
 
-router.get('/:id/edit', authorize, function(request, response, next) {
+router.get('/:comicId/edit', authorize.loggedIn, authorize.canEditComic, function(request, response, next) {
 	// this is the query string
 	var status = request.query.status;
     Comic.query()
-        .findById(request.params.id)
+        .findById(request.params.comicId)
         .eager('comicPanels.[speechBubbles]')
         .then(function(comic){
 			sortComicPanels(comic);
@@ -266,12 +266,12 @@ router.get('/:id/edit', authorize, function(request, response, next) {
         });
 });
 
-router.get('/:id/collaborators', function (req, res, next) {
+router.get('/:comicId/collaborators', function (req, res, next) {
     var comic:Comic;
     var owner:User;
 
     Comic.query()
-        .findById(req.params.id)
+        .findById(req.params.comicId)
         .eager('users')
         .then(function(returnedComic){
             comic = returnedComic;
@@ -295,7 +295,7 @@ router.get('/:id/collaborators', function (req, res, next) {
 
 
 /* POST to Add Contributor service */
-router.post('/:id/collaborators', function (req, res) {
+router.post('/:comicId/collaborators', function (req, res) {
     User
         .query()
         .where('username', req.body.username)
@@ -304,7 +304,7 @@ router.post('/:id/collaborators', function (req, res) {
             return ComicUser.query()
                 .insert({
                     user_id: user.id,
-                    comic_id: req.params.id
+                    comic_id: req.params.comicId
                 })
         })
 

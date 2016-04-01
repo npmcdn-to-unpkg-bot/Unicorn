@@ -82,6 +82,21 @@ export class User extends BaseModel {
             }            
         }
     }
+    
+    canEditComic(comic:Comic):Promise<boolean> {
+        var thisUser:User = this;
+
+        if (comic) {
+            return comic.contributors
+                .then(function(users:User[]) {
+                    return users.some(function(user:User):boolean {
+                        return thisUser.id === user.id;
+                    });
+            });
+        } else {
+            return Promise.resolve(false);
+        }
+    }
 
     get profilePictureUrl(): string {
         return this.profile_picture_url;

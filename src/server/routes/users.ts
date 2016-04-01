@@ -55,7 +55,7 @@ router.get('/contributors', function(req, res) {
 });
 
 /* GET all users page. */
-router.get('/users', authorize, function(req, res) {
+router.get('/users', authorize.loggedIn, function(req, res) {
     User.query()
         .then(function(users) {
             console.log(users);
@@ -194,7 +194,7 @@ router.get('/update', function(req, res) {
         user: req.user,
         flash: flash
     });
-})
+});
 
     
 /* POST update user. */

@@ -74,6 +74,22 @@ export class Comic extends BaseModel {
             )
             .first();
     }
+
+    /**
+     * Returns this comic's contributors.
+     *
+     * @returns {Promise}
+     */
+    get contributors() {
+        return User
+            .query()
+            .whereIn(
+                'id',
+                ComicUser.query()
+                    .select('user_id')
+                    .where('comic_id', this.id)
+            );
+    }
     
     /**
      * Returns the relative URL to view this comic.
