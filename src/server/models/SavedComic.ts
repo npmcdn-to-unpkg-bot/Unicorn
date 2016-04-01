@@ -3,12 +3,9 @@
 import {BaseModel} from "./BaseModel";
 import {User} from "./User";
 import {Comic} from "./Comic";
-import {Model, OneToOneRelation} from 'objection';
+import {Model, BelongsToOneRelation} from 'objection';
 
 export class SavedComic extends BaseModel {
-	user_id: string;
-	comic_id: string;
-
 	static get tableName():string {
 		return 'saved_comics';
 	}
@@ -18,6 +15,8 @@ export class SavedComic extends BaseModel {
 			type: 'object',
 			required: ['user_id', 'comic_id'],
 			properties: {
+				is_updated: { type: 'boolean'},
+				receive_saved_comic_email: { type: 'boolean'},
 				user_id: { type: 'string', minLength: 36, maxLength: 36 },
 				comic_id: { type: 'string', minLength: 36, maxLength: 36 },
 				created_at: {type: 'string', maxLength: 255},
@@ -29,7 +28,7 @@ export class SavedComic extends BaseModel {
 	static get relationMappings() {
 		return {
 			user: {
-				relation: OneToOneRelation,
+				relation: BelongsToOneRelation,
 				modelClass: User,
 				join: {
 					from: 'saved_comics.user_id',
@@ -37,7 +36,7 @@ export class SavedComic extends BaseModel {
 				}
 			},
 			comic: {
-				relation: OneToOneRelation,
+				relation: BelongsToOneRelation,
 				modelClass: Comic,
 				join: {
 					from: 'saved_comics.comic_id',
@@ -46,4 +45,5 @@ export class SavedComic extends BaseModel {
 			}
 		}
 	}
+	
 }

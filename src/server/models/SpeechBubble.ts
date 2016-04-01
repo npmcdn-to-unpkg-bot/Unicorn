@@ -2,7 +2,7 @@
 
 import {BaseModel} from "./BaseModel";
 import {ComicPanel} from "./ComicPanel";
-import {Model, OneToOneRelation} from 'objection';
+import {Model, BelongsToOneRelation} from 'objection';
 
 export class SpeechBubble extends BaseModel {
     position_x:number;
@@ -33,7 +33,7 @@ export class SpeechBubble extends BaseModel {
     static get relationMappings() {
         return {
             comicPanel: {
-                relation: OneToOneRelation,
+                relation: BelongsToOneRelation,
                 modelClass: ComicPanel,
                 join: {
                     from: 'speech_bubbles.comic_panel_id',

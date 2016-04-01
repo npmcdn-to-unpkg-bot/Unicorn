@@ -3,7 +3,7 @@
 import {BaseModel} from "./BaseModel";
 import {Comic} from "./Comic";
 import {SpeechBubble} from "./SpeechBubble";
-import {Model, OneToOneRelation, OneToManyRelation} from 'objection';
+import {Model, BelongsToOneRelation, HasManyRelation} from 'objection';
 
 export class ComicPanel extends BaseModel {
     comic_id:string;
@@ -34,7 +34,7 @@ export class ComicPanel extends BaseModel {
     static get relationMappings() {
         return {
             comic: {
-                relation: OneToOneRelation,
+                relation: BelongsToOneRelation,
                 modelClass: Comic,
                 join: {
                     from: 'comic_panels.comic_id',
@@ -42,7 +42,7 @@ export class ComicPanel extends BaseModel {
                 }
             },
             speechBubbles: {
-                relation: OneToManyRelation,
+                relation: HasManyRelation,
                 modelClass: SpeechBubble,
                 join: {
                     from: 'comic_panels.id',

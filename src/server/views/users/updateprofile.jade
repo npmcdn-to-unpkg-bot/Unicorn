@@ -8,14 +8,22 @@ block content
     .alert.alert-danger #{flash.usernameFail}
   -if(flash.updateSuccess)
     .alert.alert-success #{flash.updateSuccess}
+  -if(flash.profileFail)
+    .alert.alert-danger #{flash.profileFail}
+  -if(flash.profileSuccess)
+    .alert.alert-success #{flash.profileSuccess}
 
   form(role='form', method='post', action='/users/replaceProfilePicture', enctype="multipart/form-data")
     .form-group
       label.col-sm-2.control-label(for='uploadImage') Profile Picture
       .col-sm-4
-        input.form-control(type="file", name="uploadImage")
+        div.controls
+          input.form-control(type="file", name="uploadImage")
+    .form-group
       .col-sm-offset-2.col-sm-4
-        input.btn.btn-warning(type='submit', value='Replace now!')
+        button.btn.btn.btn-primary(type='submit')
+          i.fa.fa-magnet
+          | Update Profile Picture
 
   form(class='form-horizontal', action='/users/update', method='POST')
     .form-group

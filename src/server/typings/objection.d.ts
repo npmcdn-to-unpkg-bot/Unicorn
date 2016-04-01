@@ -13,7 +13,7 @@ declare module 'objection' {
         $query():any;
     }
 
-    class OneToManyRelation {}
-    class OneToOneRelation {}
+    class HasManyRelation {}
+    class BelongsToOneRelation {}
     class ManyToManyRelation {}
 }

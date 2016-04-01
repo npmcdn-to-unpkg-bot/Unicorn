@@ -29,7 +29,9 @@ var storage = multer.diskStorage({
             .where('id', '=', req.user.id)
             .then(function(numUpdated) {
                 console.log(numUpdated, "profile picture updated");
+                req.flash('profileSuccess', 'Profile picture successfully updated.');
             }).catch(function(err) {
+                req.flash('profileFail', 'Uploading profile picture failed.');
                 console.log(err);
             });
         callback(null, req.user.id + '.' + extension);
@@ -209,7 +211,7 @@ router.get('/update', function(req, res) {
         user: req.user,
         flash: flash
     });
-});
+})
 
     
 /* POST update user. */
@@ -344,7 +346,7 @@ router.post('/update', function(req, res) {
 
 router.post('/replaceProfilePicture', upload, function(req, res) {
     console.log('file: ', req.file);
-    res.redirect('/users/profile');
+    res.redirect('/users/update');
 });
 
 router.post('/:userId/delete', adminAuthorize, function(req, res, next) {
@@ -439,4 +441,5 @@ router.get('/public-profile', function(req, res, next) {
                 });
         });
 });
+
 export = router;
