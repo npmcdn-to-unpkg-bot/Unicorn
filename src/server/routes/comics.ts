@@ -396,7 +396,7 @@ router.post('/:comicId/panels/:panelId/speech-bubbles', authorize.loggedIn, auth
 });
 
 
-router.put('/speech-bubbles/:id', authorize.loggedIn, authorize.canEditComic, function(request, response, next) {
+router.put('/speech-bubbles/:id', authorize.loggedIn, function(request, response, next) {
     SpeechBubble.query()
         .findById(request.params.id)
         .then(function(speechBubble:SpeechBubble) {
@@ -448,7 +448,7 @@ router.put('/speech-bubbles/:id', authorize.loggedIn, authorize.canEditComic, fu
         });
 });
 
-router.delete('/speech-bubbles/:id', authorize.loggedIn, authorize.canEditComic, function(request, response, next) {
+router.delete('/speech-bubbles/:id', authorize.loggedIn, function(request, response, next) {
     SpeechBubble.query()
         .deleteById(request.params.id)
         .then(function(speechBubble:SpeechBubble) {
@@ -456,7 +456,7 @@ router.delete('/speech-bubbles/:id', authorize.loggedIn, authorize.canEditComic,
         });
 });
 
-router.post('/:comicPanelId/replace-background-image', authorize.loggedIn, authorize.canEditComic, function(req,res,next){
+router.post('/:comicPanelId/replace-background-image', authorize.loggedIn, function(req,res,next){
 	var status_str = "BGStatusUnknown";
 	var panelId = req.params.comicPanelId;
 	var targetComicId, targetPanel;
@@ -600,7 +600,7 @@ router.post('/:comicId/add-panel', authorize.loggedIn, authorize.canEditComic, f
 	}
 });
 
-router.post('/:panelId/delete-panel', authorize.loggedIn, authorize.canEditComic, function(req,res) {
+router.post('/:panelId/delete-panel', authorize.loggedIn, function(req,res) {
 	var panelId = req.params.panelId;
 	var status_str = 'PanelStatusUnknown';
 	var comicId = req.body.comicId;		// hidden field in the submit form
