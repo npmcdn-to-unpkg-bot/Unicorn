@@ -356,6 +356,42 @@ router.post('/:comicId/panels/:panelId/speech-bubbles', authorize.loggedIn, auth
         })
         .then(function(speechBubble:SpeechBubble) {
             response.redirect('/comics/' + request.params.comicId + '/edit');
+            Comic
+              .query()
+              .findById(request.params.comicId)
+              .then(function(targetComic:Comic){
+                User
+                  .query()
+                  .whereIn(
+                      'id',
+                      ComicUser.query()
+                          .select('user_id')
+                          .where('comic_id', targetComic.id)
+                          .where('is_owner', true)
+                  )
+                  .first()
+                  .then(function(owner:User){
+                      var req = request;
+                      console.log('Hi '+owner.username+'!\n\n'+
+                              'The user "'+req.user.username+'" has edited (added panels to) your comic, '+
+                              targetComic.title+'. Follow the link below to check it out!\n\n'+
+                              'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id);
+                      sendmail({
+                          from: 'ubc-unicorn@peter.deltchev.com',
+                          to: owner.email,
+                          subject: '[Unicorn] A user has edited your comic!',
+                          content:
+                              'Hi '+owner.username+'!\n\n'+
+                              'The user "'+req.user.username+'" has edited (added panels to) your comic, '+
+                              targetComic.title+'. Follow the link below to check it out!\n\n'+
+                              'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id
+                      }, function(err, reply){
+                          console.log('=== Sendmail results:');
+                          console.log(err);
+                          console.log(reply);
+                      });
+                  });
+              });
         });
 });
 
@@ -377,6 +413,38 @@ router.put('/speech-bubbles/:id', authorize.loggedIn, authorize.canEditComic, fu
         })
         .then(function(speechBubble:SpeechBubble) {
             response.send({success: true});
+            var targetComic = speechBubble.comicPanel.comic;
+            User
+              .query()
+              .whereIn(
+                  'id',
+                  ComicUser.query()
+                      .select('user_id')
+                      .where('comic_id', targetComic.id)
+                      .where('is_owner', true)
+              )
+              .first()
+              .then(function(owner:User){
+                  var req = request;
+                  console.log('Hi '+owner.username+'!\n\n'+
+                          'The user "'+req.user.username+'" has edited (added panels to) your comic, '+
+                          targetComic.title+'. Follow the link below to check it out!\n\n'+
+                          'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id);
+                  sendmail({
+                      from: 'ubc-unicorn@peter.deltchev.com',
+                      to: owner.email,
+                      subject: '[Unicorn] A user has edited your comic!',
+                      content:
+                          'Hi '+owner.username+'!\n\n'+
+                          'The user "'+req.user.username+'" has edited (added panels to) your comic, '+
+                          targetComic.title+'. Follow the link below to check it out!\n\n'+
+                          'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id
+                  }, function(err, reply){
+                      console.log('=== Sendmail results:');
+                      console.log(err);
+                      console.log(reply);
+                  });
+              });
         });
 });
 
@@ -498,6 +566,36 @@ router.post('/:comicId/add-panel', authorize.loggedIn, authorize.canEditComic, f
 			};
 			console.log(err);
 			res.send(response);
+      User
+      .query()
+      .whereIn(
+          'id',
+          ComicUser.query()
+              .select('user_id')
+              .where('comic_id', targetComic.id)
+              .where('is_owner', true)
+      )
+      .first()
+      .then(function(owner:User){
+          console.log('Hi '+owner.username+'!\n\n'+
+                  'The user "'+req.user.username+'" has edited (added panels to) your comic, '+
+                  targetComic.title+'. Follow the link below to check it out!\n\n'+
+                  'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id);
+          sendmail({
+              from: 'ubc-unicorn@peter.deltchev.com',
+              to: owner.email,
+              subject: '[Unicorn] A user has edited your comic!',
+              content:
+                  'Hi '+owner.username+'!\n\n'+
+                  'The user "'+req.user.username+'" has edited (added panels to) your comic, '+
+                  targetComic.title+'. Follow the link below to check it out!\n\n'+
+                  'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id
+          }, function(err, reply){
+              console.log('=== Sendmail results:');
+              console.log(err);
+              console.log(reply);
+          });
+      });
 		});
 	}
 });
@@ -693,7 +791,7 @@ router.put('/:comicId/save-panels-order', authorize.loggedIn, authorize.canEditC
       .first()
       .then(function(owner:User){
           console.log('Hi '+owner.username+'!\n\n'+
-                  'The user "'+req.user.username+'" has edited your comic, '+
+                  'The user "'+req.user.username+'" has edited (reordered panels of) your comic, '+
                   targetComic.title+'. Follow the link below to check it out!\n\n'+
                   'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id);
           sendmail({
@@ -702,7 +800,7 @@ router.put('/:comicId/save-panels-order', authorize.loggedIn, authorize.canEditC
               subject: '[Unicorn] A user has edited your comic!',
               content:
                   'Hi '+owner.username+'!\n\n'+
-                  'The user "'+req.user.username+'" has edited your comic, '+
+                  'The user "'+req.user.username+'" has edited (reordered panels of) your comic, '+
                   targetComic.title+'. Follow the link below to check it out!\n\n'+
                   'http://ubc-unicorn.deltchev.com/comics/'+targetComic.id
           }, function(err, reply){
