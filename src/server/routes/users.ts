@@ -68,6 +68,21 @@ router.get('/users', authorize.loggedIn, function(req, res) {
 
 });
 
+router.get('/usernames.json', authorize.loggedIn, function(req, res) {
+    User.query()
+        .then(function(users){
+            var usernames = users.map(function(user:User){
+                return user.username;
+            });
+            
+            res.json({usernames: usernames});
+        })
+        .catch(function(error){
+            console.log('Error!');
+            console.log(error);
+        });
+});
+
 /* GET sign up page. */
 router.get('/signup', function(req, res, next) {
     var flash = req.flash();
