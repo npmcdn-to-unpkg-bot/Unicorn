@@ -1,5 +1,5 @@
 import {Comic} from "../models/Comic";
-var passport = require('passport');
+import {User} from "../models/User";
 import * as express from 'express';
 
 var authorization = {
@@ -24,6 +24,21 @@ var authorization = {
             })
             .then(function(canEdit:boolean){
                 if (canEdit) {
+                    next();
+                } else {
+                    response.sendStatus(403);
+                }
+            });
+    },
+
+    /**
+     * This middleware assumes that a :comicId parameter is present in the URL.
+     */
+    isComicOwner: function (request:express.Request, response:express.Response, next) {
+        Comic.query().findById(request.params.comicId)
+            .owner
+            .then(function (owner:User) {
+                if (request.user.id === owner.id) {
                     next();
                 } else {
                     response.sendStatus(403);

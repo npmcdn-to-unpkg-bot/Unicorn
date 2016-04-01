@@ -57,7 +57,10 @@ router.get('/', function (req, res, next) {
         });
 });
 
-router.post('/', function(request, response, next) {
+/**
+ * Create a new comic.
+ */
+router.post('/', authorize.loggedIn, function(request, response, next) {
     Comic.query()
         .insert({title: request.body.title})
         .then(function (comic:Comic) {
@@ -128,8 +131,7 @@ router.get('/:comicId', function(request, response, next) {
             });
         });
         
-    }
-    else {
+    } else {
 
         Comic.query()
             .findById(request.params.comicId)
@@ -169,7 +171,7 @@ router.get('/:comicId', function(request, response, next) {
     }
 });
 
-router.get('/:comicId/favourite', function(request, response, next) {
+router.get('/:comicId/favourite', authorize.loggedIn, function(request, response, next) {
     User.query()
         .where('id', '=', request.user.id)
         .then(function(user) {
@@ -197,7 +199,7 @@ router.get('/:comicId/favourite', function(request, response, next) {
 
 });
 
-router.get('/:comicId/unfavourite', function(request, response, next) {
+router.get('/:comicId/unfavourite', authorize.loggedIn, function(request, response, next) {
     SavedComic.query()
         .where({
             'user_id': request.user.id,
@@ -220,7 +222,7 @@ router.get('/:comicId/unfavourite', function(request, response, next) {
 });
 
 // Request edit access to a comic
-router.post('/:comicId/request-access', function(request, response, next){
+router.post('/:comicId/request-access', authorize.loggedIn, function(request, response, next){
     // get the owner of the comic
     var comic:Comic;
     var owner:User;
@@ -266,7 +268,7 @@ router.get('/:comicId/edit', authorize.loggedIn, authorize.canEditComic, functio
         });
 });
 
-router.get('/:comicId/collaborators', function (req, res, next) {
+router.get('/:comicId/collaborators', authorize.loggedIn, authorize.canEditComic, function (req, res, next) {
     var comic:Comic;
     var owner:User;
 
@@ -295,7 +297,7 @@ router.get('/:comicId/collaborators', function (req, res, next) {
 
 
 /* POST to Add Contributor service */
-router.post('/:comicId/collaborators', function (req, res) {
+router.post('/:comicId/collaborators', authorize.loggedIn, authorize.canEditComic, function (req, res) {
     User
         .query()
         .where('username', req.body.username)
@@ -323,7 +325,7 @@ router.post('/:comicId/collaborators', function (req, res) {
 });
 
 /* DELETE a contributor from a comic */
-router.delete('/:comicId/collaborators/:userId', function (req, res) {
+router.delete('/:comicId/collaborators/:userId', authorize.loggedIn, authorize.canEditComic, function (req, res) {
     ComicUser.
         query()
         .where('comic_id', req.params.comicId)
@@ -336,7 +338,7 @@ router.delete('/:comicId/collaborators/:userId', function (req, res) {
 
 
 
-router.post('/:comicId/panels/:panelId/speech-bubbles', function(request, response, next) {
+router.post('/:comicId/panels/:panelId/speech-bubbles', authorize.loggedIn, authorize.canEditComic, function(request, response, next) {
     ComicPanel.query()
         .findById(request.params.panelId)
         .then(function(comicPanel:ComicPanel){
@@ -353,7 +355,7 @@ router.post('/:comicId/panels/:panelId/speech-bubbles', function(request, respon
 });
 
 
-router.put('/speech-bubbles/:id', function(request, response, next) {
+router.put('/speech-bubbles/:id', authorize.loggedIn, authorize.canEditComic, function(request, response, next) {
     SpeechBubble.query()
         .findById(request.params.id)
         .then(function(speechBubble:SpeechBubble) {
@@ -373,7 +375,7 @@ router.put('/speech-bubbles/:id', function(request, response, next) {
         });
 });
 
-router.delete('/speech-bubbles/:id', function(request, response, next) {
+router.delete('/speech-bubbles/:id', authorize.loggedIn, authorize.canEditComic, function(request, response, next) {
     SpeechBubble.query()
         .deleteById(request.params.id)
         .then(function(speechBubble:SpeechBubble) {
@@ -381,7 +383,7 @@ router.delete('/speech-bubbles/:id', function(request, response, next) {
         });
 });
 
-router.post('/:comicPanelId/replace-background-image',function(req,res,next){
+router.post('/:comicPanelId/replace-background-image', authorize.loggedIn, authorize.canEditComic, function(req,res,next){
 	var status_str = "BGStatusUnknown";
 	var panelId = req.params.comicPanelId;
 	var targetComicId, targetPanel;
@@ -453,7 +455,7 @@ router.post('/:comicPanelId/replace-background-image',function(req,res,next){
 	step1UpdateTitle();
 });
 
-router.post('/:comicId/add-panel', function(req,res) {
+router.post('/:comicId/add-panel', authorize.loggedIn, authorize.canEditComic, function(req,res) {
 	var comicId = req.params.comicId;
 	var status_str = 'PanelStatusUnknown';
   var targetComic, newPanel, newIndex, numPanels;
@@ -495,7 +497,7 @@ router.post('/:comicId/add-panel', function(req,res) {
 	}
 });
 
-router.post('/:panelId/delete-panel', function(req,res) {
+router.post('/:panelId/delete-panel', authorize.loggedIn, authorize.canEditComic, function(req,res) {
 	var panelId = req.params.panelId;
 	var status_str = 'PanelStatusUnknown';
 	var comicId = req.body.comicId;		// hidden field in the submit form
@@ -617,7 +619,7 @@ router.post('/:panelId/delete-panel', function(req,res) {
 	step0();
 });
 
-router.put('/:comicId/save-panels-order', function(req, res, next) {
+router.put('/:comicId/save-panels-order', authorize.loggedIn, authorize.canEditComic, function(req, res, next) {
   var status_str = "PanelReorderUnknown";
   var comicId = req.params.comicId;
   var newOrder = req.body["newOrder[]"];   // an array of old positions
