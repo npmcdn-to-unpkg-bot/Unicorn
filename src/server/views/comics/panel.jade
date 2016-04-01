@@ -8,31 +8,32 @@ li(class='-comicPanel panel-group', data-original-index=index)
           a(data-toggle="collapse", href="#collapsible-panel-"+index)="Panel"+(index+1)
     div.panel-collapse.collapse(id="collapsible-panel-"+index)
       div.panel-body
-        each bubble in panel.speechBubbles
-          blockquote(class='-speechBubble', style=bubble.inlineStyle, data-id=bubble.id, data-edit-url=bubble.editUrl)
-            span(class='-text')=bubble.text
-            a(class='-delete glyphicon glyphicon-trash', href='#', data-delete-url=bubble.deleteUrl)
-            a(class='-edit glyphicon glyphicon-pencil', href='#')
+        div.-panelContainer
+          each bubble in panel.speechBubbles
+            blockquote(class='-speechBubble', style=bubble.inlineStyle, data-id=bubble.id, data-edit-url=bubble.editUrl)
+              span(class='-text')=bubble.text
+              a(class='-delete glyphicon glyphicon-trash', href='#', data-delete-url=bubble.deleteUrl)
+              a(class='-edit glyphicon glyphicon-pencil', href='#')
 
-        img(src=panel.backgroundImageUrl)
-        div.panel-group
-          div.panel.panel-default
-            div.panel-heading
-              h4.panel-title
-                a.btn.btn-info(data-toggle="collapse", href='#edit-panel-'+index, aria-expanded="false" aria-controls="moreOptions") Edit this panel!
-            div(id='edit-panel-'+index, class="panel-collapse collapse")
-              div.panel-body
-                form(method='post', action=panel.speechBubblesUrl)
-                  input.btn.btn-info.addSpeechBubble(type='submit', value='Add a speech bubble!')
-                br
-                form.bg-success(role='form' method='post', action=panel.replaceBgiUrl, enctype="multipart/form-data")
-                  div.form-group
-                    input(type='hidden', name="comicPanelId", value=panel.id)
-                    label(for="panelTitle"+index) Replace your background image!
-                    input.form-control(type="text" name="panelTitle", id="panelTitle"+index, placeholder="You may also give your panel a new name!" )
-                    input(type="file", name="uploadImage")
-                    input.btn.btn-warning(type='submit', value='Replace now!')
-                form(method="post", action=panel.deletePanelUrl)
-                  input(type="hidden", name="comicId", value=comic.id)
+          img(src=panel.backgroundImageUrl)
+          div.panel-group
+            div.panel.panel-default
+              div.panel-heading
+                h4.panel-title
+                  a.btn.btn-info(data-toggle="collapse", href='#edit-panel-'+index, aria-expanded="false" aria-controls="moreOptions") Edit this panel!
+              div(id='edit-panel-'+index, class="panel-collapse collapse")
+                div.panel-body
+                  form(method='post', action=panel.speechBubblesUrl)
+                    input.btn.btn-info.addSpeechBubble(type='submit', value='Add a speech bubble!')
                   br
-                  input.btn.btn-danger(type='submit', value='Delete this panel!')
+                  form.bg-success(role='form' method='post', action=panel.replaceBgiUrl, enctype="multipart/form-data")
+                    div.form-group
+                      input(type='hidden', name="comicPanelId", value=panel.id)
+                      label(for="panelTitle"+index) Replace your background image!
+                      input.form-control(type="text" name="panelTitle", id="panelTitle"+index, placeholder="You may also give your panel a new name!" )
+                      input(type="file", name="uploadImage")
+                      input.btn.btn-warning(type='submit', value='Replace now!')
+                  form(method="post", action=panel.deletePanelUrl)
+                    input(type="hidden", name="comicId", value=comic.id)
+                    br
+                    input.btn.btn-danger(type='submit', value='Delete this panel!')
