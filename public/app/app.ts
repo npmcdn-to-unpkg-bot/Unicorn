@@ -1,5 +1,7 @@
 var wall; // for dev purposes wall made accessible in browser console
 $(document).ready(function () {
+    // jQuery is used in our front-end code
+    
     function updateSpeechBubble($bubble) {
         $.ajax($bubble.data('edit-url'), {
             method: 'PUT',
@@ -12,6 +14,8 @@ $(document).ready(function () {
     }
     // Reposition speech bubbles
     $('.comic.x-editor .-comicPanel .-speechBubble')
+        // "draggable" is part of jQuery UI
+        // 
         .draggable({
         stop: function (event, ui) {
             updateSpeechBubble($(this));
@@ -40,6 +44,7 @@ $(document).ready(function () {
 
 
     // Autocomplete usernames when adding contributors
+    // Uses the Bootstrap Typeahead jQuery plugin: https://github.com/bassjobsen/Bootstrap-3-Typeahead
     var $typeaheadFields = $('.typeahead-usernames');
     if ($typeaheadFields.length) {
         $.get('/users/usernames.json', function (data) {
