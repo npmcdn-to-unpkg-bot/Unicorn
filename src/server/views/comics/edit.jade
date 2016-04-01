@@ -6,7 +6,8 @@ block content
   div
     div.btn-group
       a(class='btn btn-info' href=comic.url) Back to the comic!
-      a(class='btn btn-info' href=comic.manageCollaboratorsUrl) Manage collaborators
+      if user.id == owner.id
+        a(class='btn btn-info' href=comic.manageCollaboratorsUrl) Manage collaborators
       button#add-panel-btn.btn.btn-info(data-add-panel-url=comic.addPanelUrl) Add a new comic panel!
     br
     br

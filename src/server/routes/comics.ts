@@ -258,17 +258,23 @@ router.post('/:comicId/request-access', authorize.loggedIn, function(request, re
 router.get('/:comicId/edit', authorize.loggedIn, authorize.canEditComic, function(request, response, next) {
 	// this is the query string
 	var status = request.query.status;
+    var thisComic:Comic;
+
     Comic.query()
         .findById(request.params.comicId)
         .eager('comicPanels.[speechBubbles]')
-        .then(function(comic){
-			sortComicPanels(comic);
-            response.render('comics/edit', {comic: comic, status: status});
-			console.log(comic.comicPanels);
+        .then(function(comic) {
+            sortComicPanels(comic);
+            thisComic = comic;
+            return thisComic.owner;
+
+        }).then(function(owner:User) {
+            response.render('comics/edit', {comic: thisComic, owner: owner, status: status});
+			console.log(thisComic.comicPanels);
         });
 });
 
-router.get('/:comicId/collaborators', authorize.loggedIn, authorize.canEditComic, function (req, res, next) {
+router.get('/:comicId/collaborators', authorize.loggedIn, authorize.isComicOwner, function (req, res, next) {
     var comic:Comic;
     var owner:User;
 
@@ -297,7 +303,7 @@ router.get('/:comicId/collaborators', authorize.loggedIn, authorize.canEditComic
 
 
 /* POST to Add Contributor service */
-router.post('/:comicId/collaborators', authorize.loggedIn, authorize.canEditComic, function (req, res) {
+router.post('/:comicId/collaborators', authorize.loggedIn, authorize.isComicOwner, function (req, res) {
     User
         .query()
         .where('username', req.body.username)
@@ -325,7 +331,7 @@ router.post('/:comicId/collaborators', authorize.loggedIn, authorize.canEditComi
 });
 
 /* DELETE a contributor from a comic */
-router.delete('/:comicId/collaborators/:userId', authorize.loggedIn, authorize.canEditComic, function (req, res) {
+router.delete('/:comicId/collaborators/:userId', authorize.loggedIn, authorize.isComicOwner, function (req, res) {
     ComicUser.
         query()
         .where('comic_id', req.params.comicId)

@@ -36,7 +36,9 @@ var authorization = {
      */
     isComicOwner: function (request:express.Request, response:express.Response, next) {
         Comic.query().findById(request.params.comicId)
-            .owner
+            .then(function(comic:Comic){
+                return comic.owner;
+            })
             .then(function (owner:User) {
                 if (request.user.id === owner.id) {
                     next();
