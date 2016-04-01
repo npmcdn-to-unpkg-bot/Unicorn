@@ -7,6 +7,9 @@ typings
 *.log
 src/server/**/*.js
 public/app/**/*.js
+!public/app/**/freewall.js
+!public/app/**/contentHover.js
+!public/app/**/bootstrap3-typeahead.js
 public/css/**/*.css
 !migrations/*.js
 *.js.map
