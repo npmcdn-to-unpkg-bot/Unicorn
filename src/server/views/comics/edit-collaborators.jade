@@ -16,7 +16,7 @@ block content
 
   h2 Add a new collaborator!
   form#formAddUser(name="addContributorToComic", method="post", action=comic.manageCollaboratorsUrl)
-    input#inputUserName(type="text", placeholder="username", name="username")
+    input#inputUserName(type="text", class="typeahead-usernames" placeholder="username", name="username")
     button#btnSubmit(type="submit") submit
 
   h2 Current collaborators

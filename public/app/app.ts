@@ -37,6 +37,16 @@ $(document).ready(function () {
         $speechBubble.children('.-text').text(newText);
         updateSpeechBubble($speechBubble);
     });
+
+
+    // Autocomplete usernames when adding contributors
+    var $typeaheadFields = $('.typeahead-usernames');
+    if ($typeaheadFields.length) {
+        $.get('/users/usernames.json', function (data) {
+            $typeaheadFields.typeahead({source: data.usernames});
+        }, 'json');
+    }
+
     // POST request to add panel: this is probably an overkill
     // problem: if requests sent too frequently, server gets comic panel position conflict at insertion
     function addPanel() {
