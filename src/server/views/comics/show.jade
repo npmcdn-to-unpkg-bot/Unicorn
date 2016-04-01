@@ -3,13 +3,13 @@ extends ../layout
 block content
   h1= 'Comic: ' + comic.title
 
-  if(flash.alreadySaved)
+  -if(flash.alreadySaved)
     .alert.alert-info #{flash.alreadySaved}
-  if(flash.alreadyUnfavourited)
+  -if(flash.alreadyUnfavourited)
     .alert.alert-info #{flash.alreadyUnfavourited}
-  if(flash.favouriteSuccess)
+  -if(flash.favouriteSuccess)
     .alert.alert-success #{flash.favouriteSuccess}
-  if(flash.unfavouriteSuccess)
+  -if(flash.unfavouriteSuccess)
     .alert.alert-success #{flash.unfavouriteSuccess}
 
   if isContributor
@@ -28,17 +28,10 @@ block content
             span(class='-text')=bubble.text
         img(src=panel.backgroundImageUrl)
 
-
-  if isLoggedIn && isFavourited
-    if isSubscribed
-      p
-        a(href=comic.unfavouriteUrl, class='btn btn-info') Unfavourite this comic!
-        a(href=comic.unsubscribeEmail, class='btn btn-info') Unsubscribe from email notifications
-    else  
-      a(href=comic.unfavouriteUrl, class='btn btn-info') Unfavourite this comic!
-      a(href=comic.subscribeEmail, class='btn btn-info') Subscribe to email notifications when this comic gets updated!
-  else if isLoggedIn
+  if isLoggedIn
+    p
       a(href=comic.favouriteUrl, class='btn btn-info') Favourite this comic!
+      a(href=comic.unfavouriteUrl, class='btn btn-info') Unfavourite this comic!
 
   h2= 'Contributors to this comic'
   ul

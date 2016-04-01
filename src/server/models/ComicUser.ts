@@ -1,6 +1,6 @@
 'use strict';
 
-import {BelongsToOneRelation, ManyToManyRelation} from 'objection';
+import {OneToOneRelation, ManyToManyRelation} from 'objection';
 import {User} from './User';
 import {BaseModel} from './BaseModel';
 import {Comic} from "./Comic";
@@ -31,7 +31,7 @@ export class ComicUser extends BaseModel {
     static get relationMappings() {
         return {
             comics: {
-                relation: BelongsToOneRelation,
+                relation: OneToOneRelation,
                 modelClass: Comic,
                 join: {
                     from: 'comic_user.comic_id',
@@ -39,7 +39,7 @@ export class ComicUser extends BaseModel {
                 }
             },
             users: {
-                relation: BelongsToOneRelation,
+                relation: OneToOneRelation,
                 modelClass: User,
                 join: {
                     from: 'comic_user.user_id',

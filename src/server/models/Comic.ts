@@ -1,6 +1,6 @@
 'use strict';
 
-import {HasManyRelation, ManyToManyRelation} from 'objection';
+import {OneToManyRelation, ManyToManyRelation} from 'objection';
 import {User} from './User';
 import {ComicUser} from './ComicUser';
 import {ComicPanel} from './ComicPanel';
@@ -41,7 +41,7 @@ export class Comic extends BaseModel {
                 }
             },
             comicPanels: {
-                relation: HasManyRelation,
+                relation: OneToManyRelation,
                 modelClass: ComicPanel,
                 join: {
                     from: 'comics.id',
@@ -74,7 +74,7 @@ export class Comic extends BaseModel {
             )
             .first();
     }
-    
+
     /**
      * Returns this comic's contributors.
      *
@@ -91,13 +91,6 @@ export class Comic extends BaseModel {
             );
     }
     
-    /**
-     * Returns the relative URL to view this comic.
-     * @returns {string}
-     */
-    get url():string {
-        return '/comics/'+this.id;
-    }
     /**
      * Returns the relative URL to view this comic.
      * @returns {string}
@@ -165,13 +158,5 @@ export class Comic extends BaseModel {
      */
     get deleteUrl():string {
         return '/comics/'+this.id;
-    }
-
-    get subscribeEmail(): string {
-        return '/comics/' + this.id+'/subscribeEmail';
-    }
-
-    get unsubscribeEmail(): string {
-        return '/comics/' + this.id + '/unsubscribeEmail';
     }
 }

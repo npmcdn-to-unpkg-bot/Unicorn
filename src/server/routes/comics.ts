@@ -57,6 +57,9 @@ router.get('/', function (req, res, next) {
         });
 });
 
+/**
+ * Create a new comic.
+ */
 router.post('/', authorize.loggedIn, function(request, response, next) {
     Comic.query()
         .insert({title: request.body.title})
@@ -110,12 +113,12 @@ router.get('/new', authorize.loggedIn, function(request, response, next) {
     response.render('comics/new');
 });
 
-router.get('/:id', function(request, response, next) {
+router.get('/:comicId', function(request, response, next) {
     // if statements doesn't seems to execute in query, have some duplicated code for now
     if (request.user == null) {
     
         Comic.query()
-        .findById(request.params.id)
+        .findById(request.params.comicId)
         .eager('[users, comicPanels.[speechBubbles]]')
         .then(function (comic) {
             var flash = request.flash();
@@ -128,11 +131,10 @@ router.get('/:id', function(request, response, next) {
             });
         });
         
-    }
-    else {
+    } else {
 
         Comic.query()
-            .findById(request.params.id)
+            .findById(request.params.comicId)
             .eager('[users, comicPanels.[speechBubbles]]')
             .then(function (comic) {
                 comic
@@ -141,9 +143,6 @@ router.get('/:id', function(request, response, next) {
                 .then(function (user) {
                     var flash = request.flash();
                     var isContributor = false;
-                    var isFavourited = false;
-                    var isSubscribed = false;
-
                     if (user.length != 0) {
                         isContributor = true;
                     }
@@ -151,45 +150,20 @@ router.get('/:id', function(request, response, next) {
                         isContributor = false;
                     }
                     
-
                     // 'comic' after relatedQuery seems to change the comic, requery for now 
                     Comic.query()
-                        .findById(request.params.id)
+                        .findById(request.params.comicId)
                         .eager('[users, comicPanels.[speechBubbles]]')
                         .then(function (comic) {
 							sortComicPanels(comic);
-
-                            SavedComic.query()
-                                .select('*')
-                                .where({
-                                    comic_id: comic.id,
-                                    user_id: request.user.id
-                                })
-                                .then(function(savedComic) {
-                                    if (savedComic[0]) {
-                                        isFavourited = true;
-                                        if (savedComic[0].receive_saved_comic_email) {
-                                            isSubscribed = true;
-                                        }
-                                    }
-
                             response.render('comics/show', {
                                 'user' : request.user,
                                 'comic': comic,
-                                'savedComic' : savedComic[0],
                                 'users': comic.users,
                                 'isContributor': isContributor,
                                 'isLoggedIn' : true,
-                                'isFavourited': isFavourited,
-                                'isSubscribed': isSubscribed,
                                 'flash' : flash
                             });
-                                })
-
-                                .catch(function(err) {
-                                    console.log(err);
-                                });
-
                         });
                 });
             });
@@ -197,93 +171,49 @@ router.get('/:id', function(request, response, next) {
     }
 });
 
-router.get('/:id/subscribeEmail', function(request, response, next) {
-    SavedComic.query()
-        .select('*')
-        .where({
-            user_id: request.user.id,
-            comic_id: request.params.id
+router.get('/:comicId/favourite', authorize.loggedIn, function(request, response, next) {
+    User.query()
+        .where('id', '=', request.user.id)
+        .then(function(user) {
+            console.log(user);
+
+            return user[0].$relatedQuery('savedComics')
+                .returning('*')
+                .insert({
+                    user_id: user[0].id,
+                    comic_id: request.params.comicId
+                })
         })
         .then(function(savedComic) {
-            console.log(savedComic);
-            SavedComic.query()
-                .patch({receive_saved_comic_email: true})
-                .where({
-                    user_id: savedComic[0].user_id,
-                    comic_id: savedComic[0].comic_id
-                })
-                .then(function(numUpdated) {
-                    response.redirect('/comics/' + request.params.id);
-                })
-        })
-        .catch(function(err) {
-            console.log(err);
-            response.redirect('/comics/' + request.params.id);
-        });
-
-});
-
-router.get('/:id/unsubscribeEmail', function(request, response, next) {
-    SavedComic.query()
-        .select('*')
-        .where({
-            user_id: request.user.id,
-            comic_id: request.params.id
-        })
-        .then(function(savedComic) {
-            console.log(savedComic);
-            SavedComic.query()
-                .patch({ receive_saved_comic_email: false })
-                .where({
-                    user_id: savedComic[0].user_id,
-                    comic_id: savedComic[0].comic_id
-                })
-                .then(function(numUpdated) {
-                    response.redirect('/comics/' + request.params.id);
-                })
-        })
-        .catch(function(err) {
-            console.log(err);
-            response.redirect('/comics/' + request.params.id);
-        });
-
-});
-
-router.get('/:id/favourite', function(request, response, next) {
-    SavedComic.query()
-        .returning('*')
-        .insert({
-            user_id: request.user.id,
-            comic_id: request.params.id
-        })
-        .then(function(savedComic) {
-            console.log(savedComic);
+            console.log(savedComic.user_id);
+            console.log(savedComic.comic_id);
             request.flash('favouriteSuccess', 'Comic favourited to your account!');
-            response.redirect('/comics/' + request.params.id);
+            response.redirect('/comics/' + request.params.comicId);
         })    
         .catch(function(err) {
             console.log('Error');
             console.log(err);
             request.flash('alreadySaved', 'This comic has already been favourited.');
-            response.redirect('/comics/' + request.params.id);
+            response.redirect('/comics/' + request.params.comicId);
         });
+
 });
 
-router.get('/:id/unfavourite', function(request, response, next) {
+router.get('/:comicId/unfavourite', authorize.loggedIn, function(request, response, next) {
     SavedComic.query()
         .where({
             'user_id': request.user.id,
-            'comic_id': request.params.id
+            'comic_id': request.params.comicId
         })
         .del()
         .then(function(delCount) {
             console.log(delCount);
             if (delCount === 0) {
                 request.flash('alreadyUnfavourited', 'Comic is already unfavourited.');
-                response.redirect('/comics/' + request.params.id);
+                response.redirect('/comics/' + request.params.comicId);
             } else {
                 request.flash('unfavouriteSuccess', 'Comic has been unfavourited.');
-                response.redirect('/comics/' + request.params.id);
+                response.redirect('/comics/' + request.params.comicId);
             }
         })
         .catch(function(err) {
@@ -292,13 +222,13 @@ router.get('/:id/unfavourite', function(request, response, next) {
 });
 
 // Request edit access to a comic
-router.post('/:id/request-access', function(request, response, next){
+router.post('/:comicId/request-access', authorize.loggedIn, function(request, response, next){
     // get the owner of the comic
     var comic:Comic;
     var owner:User;
 
     Comic.query()
-        .findById(request.params.id)
+        .findById(request.params.comicId)
         .eager('users')
         .then(function(thisComic:Comic) {
             comic = thisComic;
@@ -325,105 +255,30 @@ router.post('/:id/request-access', function(request, response, next){
         });
 });
 
-router.get('/:id/edit', authorize.loggedIn, function(request, response, next) {
+router.get('/:comicId/edit', authorize.loggedIn, authorize.canEditComic, function(request, response, next) {
 	// this is the query string
 	var status = request.query.status;
+    var thisComic:Comic;
+
     Comic.query()
-        .findById(request.params.id)
+        .findById(request.params.comicId)
         .eager('comicPanels.[speechBubbles]')
-        .then(function(comic){
-			sortComicPanels(comic);
-            response.render('comics/edit', {comic: comic, status: status});
-			console.log(comic.comicPanels);
-            sendSavedComicEmailNotification(comic);
+        .then(function(comic) {
+            sortComicPanels(comic);
+            thisComic = comic;
+            return thisComic.owner;
+
+        }).then(function(owner:User) {
+            response.render('comics/edit', {comic: thisComic, owner: owner, status: status});
         });
 });
 
-function sendSavedComicEmailNotification(comic) {
-    console.log('is running');
-    SavedComic.query()
-        .select('*')
-        .where({
-            comic_id: comic.id,
-            is_updated: true,
-            receive_saved_comic_email: true
-        })
-        .then(function(updatedSavedComics) {
-            console.log(updatedSavedComics.length);
-
-
-            for (var i = 0; i < updatedSavedComics.length; i++) {
-                var thisComic = updatedSavedComics[i];
-
-                User.query()
-                    .select('*')
-                    .where({
-                        id: thisComic.user_id
-                    })
-                    .then(function(thisUser) {
-
-                        Comic.query()
-                            .select('*')
-                            .where({
-                                id: thisComic.comic_id
-                            })
-                            .then(function(thisComic) {
-                                console.log(thisUser[0].email, thisComic[0].title);
-
-                                sendmail({
-                                    from: 'ubc-unicorn@peter.deltchev.com',
-                                    to: thisUser[0].email,
-                                    subject: '[Unicorn] A user has updated the comic "' + thisComic[0].title + '"',
-                                    content:
-                                    'Hi ' + thisUser[0].username + '!\n\n' +
-                                    'One of your favourited comics "' + thisComic[0].title + '" has been updated. To view the comic, follow the link below!\n\n' +
-                                    'http://ubc-unicorn.deltchev.com' + thisComic[0].url
-                                } , function(err, reply) {
-                                    console.log('=== Sendmail results:');
-                                    console.log(err);
-                                    console.log(reply);
-                                });
-                                console.log('email sent');
-                            })
-
-                    })
-                    .catch(function(err) {
-                        console.log(err);
-                    });
-
-
-                // then set is_updated = 0
-                SavedComic.query()
-                    .where({
-                        comic_id: updatedSavedComics[i].comic_id,
-                        user_id: updatedSavedComics[i].user_id
-                    })
-                    .then(function(savedComic) {
-                        return SavedComic.query()
-                           .patch({ is_updated: false })
-                           .where({
-                               comic_id: savedComic[0].comic_id,
-                               user_id: savedComic[0].user_id
-                           })
- 
-                    })
-                    .then(function(updatedNum) {
-                        console.log(updatedNum, 'saved comic updated');
-                    })
-                    
-                    .catch(function(err) {
-                        console.log(err);
-                    });
-            }
-        })
-}
-
-router.get('/:id/collaborators', authorize.loggedIn, function (req, res, next) {
+router.get('/:comicId/collaborators', authorize.loggedIn, authorize.isComicOwner, function (req, res, next) {
     var comic:Comic;
     var owner:User;
 
     Comic.query()
-        .findById(req.params.id)
+        .findById(req.params.comicId)
         .eager('users')
         .then(function(returnedComic){
             comic = returnedComic;
@@ -447,7 +302,7 @@ router.get('/:id/collaborators', authorize.loggedIn, function (req, res, next) {
 
 
 /* POST to Add Contributor service */
-router.post('/:id/collaborators', authorize.loggedIn, function(req, res) {
+router.post('/:comicId/collaborators', authorize.loggedIn, authorize.isComicOwner, function (req, res) {
     User
         .query()
         .where('username', req.body.username)
@@ -456,7 +311,7 @@ router.post('/:id/collaborators', authorize.loggedIn, function(req, res) {
             return ComicUser.query()
                 .insert({
                     user_id: user.id,
-                    comic_id: req.params.id
+                    comic_id: req.params.comicId
                 })
         })
 
@@ -475,7 +330,7 @@ router.post('/:id/collaborators', authorize.loggedIn, function(req, res) {
 });
 
 /* DELETE a contributor from a comic */
-router.delete('/:comicId/collaborators/:userId', authorize.loggedIn, function (req, res) {
+router.delete('/:comicId/collaborators/:userId', authorize.loggedIn, authorize.isComicOwner, function (req, res) {
     ComicUser.
         query()
         .where('comic_id', req.params.comicId)
@@ -488,7 +343,7 @@ router.delete('/:comicId/collaborators/:userId', authorize.loggedIn, function (r
 
 
 
-router.post('/:comicId/panels/:panelId/speech-bubbles', authorize.loggedIn, function(request, response, next) {
+router.post('/:comicId/panels/:panelId/speech-bubbles', authorize.loggedIn, authorize.canEditComic, function(request, response, next) {
     ComicPanel.query()
         .findById(request.params.panelId)
         .then(function(comicPanel:ComicPanel){
@@ -541,7 +396,7 @@ router.post('/:comicId/panels/:panelId/speech-bubbles', authorize.loggedIn, func
 });
 
 
-router.put('/speech-bubbles/:id', authorize.loggedIn, function(request, response, next) {
+router.put('/speech-bubbles/:id', authorize.loggedIn, authorize.canEditComic, function(request, response, next) {
     SpeechBubble.query()
         .findById(request.params.id)
         .then(function(speechBubble:SpeechBubble) {
@@ -593,7 +448,7 @@ router.put('/speech-bubbles/:id', authorize.loggedIn, function(request, response
         });
 });
 
-router.delete('/speech-bubbles/:id', authorize.loggedIn, function(request, response, next) {
+router.delete('/speech-bubbles/:id', authorize.loggedIn, authorize.canEditComic, function(request, response, next) {
     SpeechBubble.query()
         .deleteById(request.params.id)
         .then(function(speechBubble:SpeechBubble) {
@@ -601,7 +456,7 @@ router.delete('/speech-bubbles/:id', authorize.loggedIn, function(request, respo
         });
 });
 
-router.post('/:comicPanelId/replace-background-image', authorize.loggedIn, function(req, res, next) {
+router.post('/:comicPanelId/replace-background-image', authorize.loggedIn, authorize.canEditComic, function(req,res,next){
 	var status_str = "BGStatusUnknown";
 	var panelId = req.params.comicPanelId;
 	var targetComicId, targetPanel;
@@ -673,7 +528,7 @@ router.post('/:comicPanelId/replace-background-image', authorize.loggedIn, funct
 	step1UpdateTitle();
 });
 
-router.post('/:comicId/add-panel', authorize.loggedIn, function(req, res) {
+router.post('/:comicId/add-panel', authorize.loggedIn, authorize.canEditComic, function(req,res) {
 	var comicId = req.params.comicId;
 	var status_str = 'PanelStatusUnknown';
   var targetComic, newPanel, newIndex, numPanels;
@@ -745,7 +600,7 @@ router.post('/:comicId/add-panel', authorize.loggedIn, function(req, res) {
 	}
 });
 
-router.post('/:panelId/delete-panel', authorize.loggedIn, function(req, res) {
+router.post('/:panelId/delete-panel', authorize.loggedIn, authorize.canEditComic, function(req,res) {
 	var panelId = req.params.panelId;
 	var status_str = 'PanelStatusUnknown';
 	var comicId = req.body.comicId;		// hidden field in the submit form
@@ -867,13 +722,11 @@ router.post('/:panelId/delete-panel', authorize.loggedIn, function(req, res) {
 	step0();
 });
 
-router.put('/:comicId/save-panels-order', authorize.loggedIn, function(req, res, next) {
+router.put('/:comicId/save-panels-order', authorize.loggedIn, authorize.canEditComic, function(req, res, next) {
   var status_str = "PanelReorderUnknown";
   var comicId = req.params.comicId;
   var newOrder = req.body["newOrder[]"];   // an array of old positions
   var numPanels;
-  console.log(newOrder);
-  console.log(req.body);
   var targetComic;
   
   Comic.query().findById(comicId).eager('comicPanels').then(function(comic){
@@ -899,13 +752,11 @@ router.put('/:comicId/save-panels-order', authorize.loggedIn, function(req, res,
       return p;
     }
     Promise.all(promises).then(function(results){
-      console.log(results);
       var promises1 = [];
       targetComic.comicPanels.forEach(function(panel){
         promises1.push(promiseGenerator(panel,0));
       });
       Promise.all(promises1).then(function(results){
-        console.log(results);
         status_str = 'PanelReordered';
         respondToUser();
       },function(reason){
@@ -928,7 +779,6 @@ router.put('/:comicId/save-panels-order', authorize.loggedIn, function(req, res,
     var response = {
       statusString: status_str
     };
-<<<<<<< ccc11bda7354d403a7d9f661551d9e3cecd4ba35
     User
       .query()
       .whereIn(
@@ -960,9 +810,6 @@ router.put('/:comicId/save-panels-order', authorize.loggedIn, function(req, res,
           });
           res.send(response);
       });
-
-    res.send(response);
-
   }
 });
 

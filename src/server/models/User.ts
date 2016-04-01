@@ -1,6 +1,6 @@
 'use strict';
 
-import {HasManyRelation, ManyToManyRelation} from 'objection';
+import {OneToManyRelation, ManyToManyRelation} from 'objection';
 import {Comic} from './Comic';
 import {ComicUser} from './ComicUser';
 import {SavedComic} from './SavedComic';
@@ -60,7 +60,7 @@ export class User extends BaseModel {
                 }
             },
             savedComics: {
-                relation: HasManyRelation,
+                relation: OneToManyRelation,
                 modelClass: SavedComic,
                 join: {
                     from: 'users.id',
@@ -97,7 +97,6 @@ export class User extends BaseModel {
             return Promise.resolve(false);
         }
     }
-    
 
     get profilePictureUrl(): string {
         return this.profile_picture_url;
