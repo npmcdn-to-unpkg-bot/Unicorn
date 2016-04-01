@@ -36,4 +36,5 @@ block content
   h2= 'Contributors to this comic'
   ul
     each user in users
-      li=user.username
+      li
+        a(href="/users/public-profile?username="+user.username) #{user.username}
